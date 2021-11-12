@@ -1,9 +1,9 @@
-function [acc_vec,acc_avg]=kfold_Acc(data,labels,k,n)
+function [acc_vec,acc_avg]=kfold_Acc(Mdl,data,labels,k,n)
 %Function which trains an LDA classifier on the data 'data', with labales
 %'labels' using k-fold cross validation and n=number of data samples
 
 %Setting Parameters
-acc_vec=zeros(1,k-1); %Vector with accuracy for each fold
+acc_vec=zeros(1,k); %Vector with accuracy for each fold
 
 for(i=[2:k])
     c=cvpartition(n,'KFold',i);
