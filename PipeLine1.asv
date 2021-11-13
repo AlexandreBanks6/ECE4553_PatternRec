@@ -35,7 +35,7 @@ ImData=[circ_im,elong_im,other_im];
 %(We might want to look into normalizing by number of pixels)!!!
 ImGray=ConvRGB_to_GRAY(ImData); %Extracts the grayscale images
 
-[FeatureArray, FeatNames] = extractCellFeatures(ImGray);
+extractCe
 
 % %----------------------<Binarize each image>----------------
 % %Returns cell array containing all the binary images
@@ -147,7 +147,7 @@ ImGray=ConvRGB_to_GRAY(ImData); %Extracts the grayscale images
 % %Array of features
 % FeatureArray=[PerimVec',AreaVec',CircularityVec',MinDiamVec',MaxDiamVec',ElipVec',ConvexHullVec',...
 %     EccentricityVec',EquivDiamVec',SolidityVec',TextureVec',SymmetryVec'];
-% FeatNames={'Perim','Area','Circularity','MinDiam','MaxDiam','Elipticity','ConvexArea',...
+% FeatNames={'Perim','Area','Circulatiry','MinDiam','MaxDiam','Elipticity','ConvexArea',...
 %     'Eccentricity','EquivalentDiam','Solidity','Texture','Symmetry'};
 %% Sequential Feature Selection
 

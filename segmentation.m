@@ -32,49 +32,14 @@ for i = 1:numImages
     
 end
 
-
 % Convert RGB images to grayscale
 grayImages = ConvRGB_to_GRAY(fullImages)';
 
 
 %% Split up full field images into datasets
 
-% rgbImage = imread('source.jpg');
-% grayImage = imadjust(imadjust(rgb2gray(rgbImage))); % Convert rgb image to grayscale, increase contrast
-% figure()
-% imshow(grayImage);
-fullFieldDataset = cell(numImages, 1);   % Array to hold dataset of full field images broken down
-for i = 1:numImages
-    grayImage = imadjust(grayImages{i});    % Contrast cells from background
-    
-    % Get individual cells
-    [cells, numCells] = findCells(grayImage);   % Get cells as logical arrays
-    
-    individualCells = cell(numCells, 1);   % Array to hold dataset from full field image
-    
-    for j = 1:numCells
-        % Store each individual cell image in dataset
-        cellImage = newCellImage(grayImage, cells{j});  % Crop image to show one cell
-        individualCells{j} = cellImage;
-    end
-    
-    fullFieldDataset{i} = individualCells;    % Store dataset in cell array of image datasets
-    
-end
+segmented = segmentFullFieldImages(grayImages);
 
-% binImage = imbinarize(grayImage);  %% Convert to binary image
-% imshow(binImage)
 
-% grayImage = imadjust(grayImages{1});
-% figure()
-% imshow(grayImage)
-% 
-% % Get individual cells
-% cells = findCells(grayImage);   % Get cells as logical arrays
-% 
-% % Crop image to show one cell
-% cellImage = newCellImage(grayImage, cells{4});
-% figure()
-% imshow(cellImage)
 
 
