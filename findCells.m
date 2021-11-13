@@ -1,39 +1,31 @@
-function cells = findCells(image, layers)
+function cells = findCells(image)
 %%% Find cell clusters within a given image using the layer matrix.
 
 cells = cell(20, 1);    % Assume >= 20 cells in each image
 
-% Search through and find where element is equal to 2 (cell)
-indices = find(layers == 2);
-[r, c] = find(layers == 2);  % Elements that are in the cell layer
-previousCells = false(size(image));
+tempImage = imbinarize(image, 'adaptive', 'Sensitivity', 1);    % binarize image with high sensitivity threshold
 
-% Check to make sure that this cell has not been checked already:
-% AND the current cell with all previous ones, if any elements are > 0 then
-% cell already has been counted
+cellArray=imfill(~tempImage,'holes');    %Fills the holes
+
+
+new = bwconncomp(cellArray);    % Find all connected components in image   
+def = false(size(image));   % Default logical array
+
 k = 1;
-for i = 1:length(r)
-    % THIS IS WAY TOO SLOW
-    if r(i) ~= 0
-        newCell = grayconnected(image, r(i), c(i));
-        if ~any(newCell & previousCells, 'all')
-            % Cell does not already exist
-            previousCells = previousCells | newCell;   % Save new cell into previous cells so it doesn't get counted twice
-            cells{k} = newCell; % Save new cell in array
-            k = k + 1;
-%             newIdx = find(newCell);
-%             otherIdx = find(indices == newIdx);
-%             r(otherIdx) = 0;
-%             c(otherIdx) = 0;
-            
-            %         [cellr, cellc] = find(newCell);
-            %         r = r(r~=cellr);
-            %         c = c(c~=cellc);
-        end
+for i = 1:new.NumObjects
+    idx = new.PixelIdxList{i};
+    area = length(idx);
+    if area > 3000
+        def(idx) = 1;
+        cells{k} = def;
+        k = k + 1;
     end
+    
 end
+% for j = 1:length(cells)
+% imshowpair(cells{j}, image, 'montage')
+% end
 
-% newCellIndices = grayconnected(grayImage, 111, 1908);   % Get one specific cluster
 
 end
 
