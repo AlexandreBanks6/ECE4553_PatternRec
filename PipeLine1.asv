@@ -168,8 +168,31 @@ FeatNames={'Perim','Area','Circulatiry','MinDiam','MaxDiam','Elipticity','Convex
 %     indexvec1=indexvec2;    
 % end
 
+%% Feature Ranking Using MRMR Algorithm
+
 [idx,score]=fscmrmr(FeatureArray,labels);
 Features_mrmr=FeatureArray(:,idx);
+idxScores = score(idx);
+
+% Plot of scores
+figure()
+bar(idxScores)
+
+% Find number of features to include
+featurePerc = 60;   % Percentage of feature score to retain
+currentScore = 0;
+totalScore = sum(score);    % Total score of all features
+for i = 1:length(score)
+    currentScore = currentScore + idxScores(i);
+    if currentScore/totalScore > featurePerc/100
+        numFeats = i;   % Number of features to use after feature selection
+        break;
+    end
+end
+
+FS_Features = Features_mrmr(:, 1:numFeats); % Features after feature selection
+
+
 
 %% Using ULDA For Dimensionality Reduction
 PercGoal=95;    %95 percent of total variance explained by projected data
@@ -183,19 +206,37 @@ tallrng('default');
 %% ---------------------------<Naive Bayes>-----------------------------------
 
 NB_Model=fitcnb(ULDA_Features,labels);   %Creates a linear model
+NB_FS_Model=fitcnb(FS_Features,labels);   %Creates a linear model
+
 NB_CVModel=crossval(NB_Model);    %Cross Validates the model using 10-fold cross validation
+NB_FS_CVModel=crossval(NB_FS_Model);    %Cross Validates the model using 10-fold cross validation
+
 ACC_NB=1-kfoldLoss(NB_CVModel);   %Determines average accuracy of the lda model
+ACC_FS_NB=1-kfoldLoss(NB_FS_CVModel);   %Determines average accuracy of the lda model
+
 
 %% -----------------------------<LDA>-----------------------------------
 
 LDA_Model=fitcdiscr(ULDA_Features,labels,'discrimtype','linear');   %Creates a linear model
+LDA_FS_Model=fitcdiscr(FS_Features,labels,'discrimtype','linear');   %Creates a linear model
+
 LDA_CVModel=crossval(LDA_Model);    %Cross Validates the model using 10-fold cross validation
+LDA_FS_CVModel=crossval(LDA_FS_Model);    %Cross Validates the model using 10-fold cross validation
+
 ACC_LDA=1-kfoldLoss(LDA_CVModel);   %Determines average accuracy of the lda model
+ACC_FS_LDA=1-kfoldLoss(LDA_FS_CVModel);   %Determines average accuracy of the lda model
+
 
 %% -----------------------------<QDA>----------------------------------
 QDA_Model=fitcdiscr(ULDA_Features,labels,'discrimtype','quadratic');   %Creates a quadratic model
+QDA_FS_Model=fitcdiscr(FS_Features,labels,'discrimtype','quadratic');   %Creates a quadratic model
+
 QDA_CVModel=crossval(QDA_Model);    %Cross Validates the model using 10-fold cross validation
+QDA_FS_CVModel=crossval(QDA_FS_Model);    %Cross Validates the model using 10-fold cross validation
+
 ACC_QDA=1-kfoldLoss(QDA_CVModel);   %Determines the accuracy of the lda model
+ACC_FS_QDA=1-kfoldLoss(QDA_FS_CVModel);   %Determines the accuracy of the lda model
+
 
 %% -----------------------------<kNN>----------------------------------
 %Finds the hyperparameters (k and distance measure) that minimuze the loss by using the
@@ -209,8 +250,14 @@ DistMeas=kNN_Optimize.Distance;
 
 %Train the kNN
 kNN_Model=fitcknn(ULDA_Features,labels,'NumNeighbors',k,'Distance',DistMeas);    %Trains kNN with optimal hyperparameters
+kNN_FS_Model=fitcknn(FS_Features,labels,'NumNeighbors',k,'Distance',DistMeas);    %Trains kNN with optimal hyperparameters
+
 kNN_CVModel=crossval(kNN_Model);    %Cross Validates the model using 10-fold cross validation
+kNN_FS_CVModel=crossval(kNN_FS_Model);    %Cross Validates the model using 10-fold cross validation
+
 ACC_kNN=1-kfoldLoss(kNN_CVModel);   %Determines the accuracy of the lda model
+ACC_FS_kNN=1-kfoldLoss(kNN_FS_CVModel);   %Determines the accuracy of the lda model
+
 
 %% ---------------------------<Decision Tree>-------------------------
 %Automatically optimizes to find the minimum leaf size hyperparameter using
@@ -222,8 +269,14 @@ MinLeaf=DT_Optimize.ModelParameters.MinLeaf;    %Minimum size of leaves
 
 %Train the Decision Tree
 DT_Model=fitctree(ULDA_Features,labels,'MinLeafSize',MinLeaf);    %Trains kNN with optimal hyperparameters
+DT_FS_Model=fitctree(FS_Features,labels,'MinLeafSize',MinLeaf);    %Trains kNN with optimal hyperparameters
+
 DT_CVModel=crossval(DT_Model);    %Cross Validates the model using 10-fold cross validation
+DT_FS_CVModel=crossval(DT_FS_Model);    %Cross Validates the model using 10-fold cross validation
+
 ACC_DT=1-kfoldLoss(DT_CVModel);   %Determines the accuracy of the DT model
+ACC_FS_DT=1-kfoldLoss(DT_FS_CVModel);   %Determines the accuracy of the DT model
+
 
 %% ------------------------------<SVM>--------------------------------
 %Trains a multiclass error-correcting outputs codes using k(k-1)/2 binary
@@ -237,8 +290,13 @@ KernelScale=table2array(SVM_Optimize.HyperparameterOptimizationResults.XAtMinObj
 
 t=templateSVM('BoxConstraint',BoxCon,'KernelScale',KernelScale);
 SVM_Model=fitcecoc(ULDA_Features,labels,'Learners',t);
+SVM_FS_Model=fitcecoc(FS_Features,labels,'Learners',t);
+
 SVM_CVModel=crossval(SVM_Model);    %Cross Validates the model using 10-fold cross validation
+SVM_FS_CVModel=crossval(SVM_FS_Model);    %Cross Validates the model using 10-fold cross validation
+
 ACC_SVM=1-kfoldLoss(SVM_CVModel);   %Determines the accuracy of the DT model
+ACC_FS_SVM=1-kfoldLoss(SVM_FS_CVModel);   %Determines the accuracy of the DT model
 
 
 
