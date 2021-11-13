@@ -43,66 +43,38 @@ grayImages = ConvRGB_to_GRAY(fullImages)';
 % grayImage = imadjust(imadjust(rgb2gray(rgbImage))); % Convert rgb image to grayscale, increase contrast
 % figure()
 % imshow(grayImage);
-% for i = 1:numImages
-%     grayImage = imadjust(grayImages{i});    % Contrast cells from background
-%     
-%     % Get individual cell
-%     layers = imsegkmeans(grayImage, 2); % Segment image into two layers
-%     cells = findCells(layers);    % Find cells in image
-%     for j = 1:length(cells)
-%         newCellIndices = grayconnected(grayImage, cells(j, 1), cells(j, 2));
-%     end
-%     
-% end
+fullFieldDataset = cell(numImages, 1);   % Array to hold dataset of full field images broken down
+for i = 1:numImages
+    grayImage = imadjust(grayImages{i});    % Contrast cells from background
+    
+    % Get individual cells
+    [cells, numCells] = findCells(grayImage);   % Get cells as logical arrays
+    
+    individualCells = cell(numCells, 1);   % Array to hold dataset from full field image
+    
+    for j = 1:numCells
+        % Store each individual cell image in dataset
+        cellImage = newCellImage(grayImage, cells{j});  % Crop image to show one cell
+        individualCells{j} = cellImage;
+    end
+    
+    fullFieldDataset{i} = individualCells;    % Store dataset in cell array of image datasets
+    
+end
 
 % binImage = imbinarize(grayImage);  %% Convert to binary image
 % imshow(binImage)
 
-grayImage = imadjust(grayImages{1});
-
-% Get individual cell
-layers = imsegkmeans(grayImage, 2);  % Segment image into two layers
-cells = findCells(grayImage, layers);
-% newCellIndices = grayconnected(grayImage, 111, 1908);   % Get one specific cluster
-% imshow(labeloverlay(grayImage, newCellIndices))
-
-% Crop image to show one cell
-cellImage = newCellImage(grayImage, newCellIndices);
-figure()
-imshow(cellImage)
-
-
-%% BAD/OLD CODE
-
-% boundaries = bwboundaries(BW);  % coordinates of all boundaries in binary image
+% grayImage = imadjust(grayImages{1});
 % figure()
-% imshow(BW)
-% hold on
-% for k = 1:length(boundaries)
-%     boundary = boundaries{k};
-%     plot(boundary(:, 2), boundary(:, 1), 'r', 'LineWidth', 2)
-% end
-
-% B = labeloverlay(grayImage, L);
-% imshow(B)
-
-
-% test = boundaries{125};
-% xmin = min(test(:, 1));
-% xmax = max(test(:, 1));
-% ymin = min(test(:, 2));
-% ymax = max(test(:, 2));
-% width = xmax - xmin;
-% height = ymax - ymin;
-% rect = [xmin ymin width height];
-%
-% I2 = imcrop(BW, rect);
+% imshow(grayImage)
+% 
+% % Get individual cells
+% cells = findCells(grayImage);   % Get cells as logical arrays
+% 
+% % Crop image to show one cell
+% cellImage = newCellImage(grayImage, cells{4});
 % figure()
-% imshow(I2)
+% imshow(cellImage)
 
-% edgeI = edge(BW);
-% imshow(edgeI)
 
-% hey = BW(test(:, 1), test(:, 2));
-% figure()
-% imshow(hey)
