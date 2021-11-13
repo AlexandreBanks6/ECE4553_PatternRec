@@ -1,26 +1,36 @@
 function cells = findCells(image)
 %%% Find cell clusters within a given image using the layer matrix.
 
-cells = cell(20, 1);    % Assume >= 20 cells in each image
+minimumArea = 3000; % Minimum area to determine if object is a cell
+cellIdx = cell(100, 1);    % Preallocate cell index array
 
 tempImage = imbinarize(image, 'adaptive', 'Sensitivity', 1);    % binarize image with high sensitivity threshold
 
 cellArray=imfill(~tempImage,'holes');    %Fills the holes
 
+CC = bwconncomp(cellArray);    % Find all connected components in image   
 
-new = bwconncomp(cellArray);    % Find all connected components in image   
-def = false(size(image));   % Default logical array
-
-k = 1;
-for i = 1:new.NumObjects
-    idx = new.PixelIdxList{i};
+numCells = 0;
+for i = 1:CC.NumObjects
+    idx = CC.PixelIdxList{i};
     area = length(idx);
-    if area > 3000
-        def(idx) = 1;
-        cells{k} = def;
-        k = k + 1;
+    if area > minimumArea
+        numCells = numCells + 1;
+        cellIdx{numCells} = idx;    % Save cell index
+%         falseArr = false(size(image));   % Default logical array
+%         falseArr(idx) = 1;
+%         cells{k} = falseArr;
+%         k = k + 1;
     end
-    
+end
+
+cells = cell(numCells, 1);  % Preallocate array
+
+for i = 1:numCells
+    falseArr = false(size(image));   % Default logical array
+    idx = cellIdx{i};
+    falseArr(idx) = 1;
+    cells{i} = falseArr;
 end
 % for j = 1:length(cells)
 % imshowpair(cells{j}, image, 'montage')
