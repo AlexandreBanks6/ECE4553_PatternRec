@@ -26,8 +26,10 @@ other_im=readimagefiles(othercell_files,'other'); %Circular blood cell images
 %Creating labels (1==circular, 2==elongated, 3==other)
 labels=[ones(1,length(circ_im)),2*ones(1,length(elong_im)),1*ones(1,length(other_im))];
 labels=labels';
+
 %Combining datasets
 ImData=[circ_im,elong_im,other_im];
+
 
 
 
@@ -146,6 +148,8 @@ FeatureArray=[PerimVec',AreaVec',CircularityVec',MinDiamVec',MaxDiamVec',ElipVec
     EccentricityVec',EquivDiamVec',SolidityVec',TextureVec',SymmetryVec'];
 FeatNames={'Perim','Area','Circulatiry','MinDiam','MaxDiam','Elipticity','ConvexArea',...
     'Eccentricity','EquivalentDiam','Solidity','Texture','Symmetry'};
+
+
 %% Sequential Feature Selection
 
 %Function defining criterion used to select features (this is using sum of squares from line)
@@ -200,7 +204,15 @@ PercGoal=95;    %95 percent of total variance explained by projected data
 
 [FS_ULDA_Features,FS_explained,FS_ProjDatUnCleaned]=ULDA(FS_Features,labels,PercGoal);
 
-
+%Splitting the data into training and test sets. Training sets will be used to train the model
+%and perform 10-fold cross-validation. The test sets will be spit again into 20 further test sets which will be 
+%used in an ANOVA to compare the accuracy between the classifiers
+cv=cvpartition(length(ULDA_Features(:,1)),'HoldOut',0.33);  %Train: 67%, Test: 33%
+index=cv.test;
+ULDA_Features_Test=ULDA_Features(index,:);    %Testing data
+ULDA_Features=ULDA_Features(~index,:);    %Training data
+TestLabels=labels(index);   %Test labels
+labelsnew=labels(~index);  %Labels for training
 
 
 %% ----------------------<Training Classifiers>------------------------
@@ -208,7 +220,7 @@ rng('default'); %Sets the random number generator for repeatability
 tallrng('default');
 %% ---------------------------<Naive Bayes>-----------------------------------
 
-NB_Model=fitcnb(ULDA_Features,labels);   %Creates a linear model
+NB_Model=fitcnb(ULDA_Features,labelsnew);   %Creates a linear model
 NB_FS_Model=fitcnb(FS_Features,labels);   %Creates a linear model
 NB_FS_ULDA_Model=fitcnb(FS_ULDA_Features,labels);   %Creates a linear model
 
@@ -226,7 +238,7 @@ ACC_FS_ULDA_NB=1-kfoldLoss(NB_FS_ULDA_CVModel);   %Determines average accuracy o
 
 %% -----------------------------<LDA>-----------------------------------
 
-LDA_Model=fitcdiscr(ULDA_Features,labels,'discrimtype','linear');   %Creates a linear model
+LDA_Model=fitcdiscr(ULDA_Features,labelsnew,'discrimtype','linear');   %Creates a linear model
 LDA_FS_Model=fitcdiscr(FS_Features,labels,'discrimtype','linear');   %Creates a linear model
 LDA_FS_ULDA_Model=fitcdiscr(FS_ULDA_Features,labels,'discrimtype','linear');   %Creates a linear model
 
@@ -240,7 +252,7 @@ ACC_FS_LDA_ULDA=1-kfoldLoss(LDA_FS_ULDA_CVModel);   %Determines average accuracy
 
 
 %% -----------------------------<QDA>----------------------------------
-QDA_Model=fitcdiscr(ULDA_Features,labels,'discrimtype','quadratic');   %Creates a quadratic model
+QDA_Model=fitcdiscr(ULDA_Features,labelsnew,'discrimtype','quadratic');   %Creates a quadratic model
 QDA_FS_Model=fitcdiscr(FS_Features,labels,'discrimtype','quadratic');   %Creates a quadratic model
 QDA_FS_ULDA_Model=fitcdiscr(FS_ULDA_Features,labels,'discrimtype','quadratic');   %Creates a quadratic model
 
@@ -257,14 +269,14 @@ ACC_FS_ULDA_QDA=1-kfoldLoss(QDA_FS_ULDA_CVModel);   %Determines the accuracy of 
 %Finds the hyperparameters (k and distance measure) that minimuze the loss by using the
 %automatic hyperparameter optimization and 10-fold cross validation
 c=cvpartition(length(ULDA_Features(:,1)),'Kfold',10);
-kNN_Optimize=fitcknn(ULDA_Features,labels,'OptimizeHyperparameters','auto',...
+kNN_Optimize=fitcknn(ULDA_Features,labelsnew,'OptimizeHyperparameters','auto',...
     'HyperparameterOptimizationOptions',struct('AcquisitionFunctionName','expected-improvement-plus','CVPartition',c,...
     'ShowPlots',false,'Verbose',0));
 k=kNN_Optimize.NumNeighbors; %Optimal number of neighbours
 DistMeas=kNN_Optimize.Distance;
 
 %Train the kNN
-kNN_Model=fitcknn(ULDA_Features,labels,'NumNeighbors',k,'Distance',DistMeas);    %Trains kNN with optimal hyperparameters
+kNN_Model=fitcknn(ULDA_Features,labelsnew,'NumNeighbors',k,'Distance',DistMeas);    %Trains kNN with optimal hyperparameters
 kNN_FS_Model=fitcknn(FS_Features,labels,'NumNeighbors',k,'Distance',DistMeas);    %Trains kNN with optimal hyperparameters
 kNN_FS_ULDA_Model=fitcknn(FS_ULDA_Features,labels,'NumNeighbors',k,'Distance',DistMeas);    %Trains kNN with optimal hyperparameters
 
@@ -280,13 +292,13 @@ ACC_FS_ULDA_kNN=1-kfoldLoss(kNN_FS_ULDA_CVModel);   %Determines the accuracy of 
 %% ---------------------------<Decision Tree>-------------------------
 %Automatically optimizes to find the minimum leaf size hyperparameter using
 %10 fold cross validation
-DT_Optimize=fitctree(ULDA_Features,labels,'OptimizeHyperparameters','auto',...
+DT_Optimize=fitctree(ULDA_Features,labelsnew,'OptimizeHyperparameters','auto',...
     'HyperparameterOptimizationOptions',struct('AcquisitionFunctionName','expected-improvement-plus','CVPartition',c,...
     'ShowPlots',false,'Verbose',0));
 MinLeaf=DT_Optimize.ModelParameters.MinLeaf;    %Minimum size of leaves
 
 %Train the Decision Tree
-DT_Model=fitctree(ULDA_Features,labels,'MinLeafSize',MinLeaf);    %Trains kNN with optimal hyperparameters
+DT_Model=fitctree(ULDA_Features,labelsnew,'MinLeafSize',MinLeaf);    %Trains kNN with optimal hyperparameters
 DT_FS_Model=fitctree(FS_Features,labels,'MinLeafSize',MinLeaf);    %Trains kNN with optimal hyperparameters
 DT_FS_ULDA_Model=fitctree(FS_ULDA_Features,labels,'MinLeafSize',MinLeaf);    %Trains kNN with optimal hyperparameters
 
@@ -303,14 +315,14 @@ ACC_FS_ULDA_DT=1-kfoldLoss(DT_FS_ULDA_CVModel);   %Determines the accuracy of th
 %Trains a multiclass error-correcting outputs codes using k(k-1)/2 binary
 %support vector machine. We also standardize the predictors
 %Optimize the hyperparameters
-SVM_Optimize=fitcecoc(ULDA_Features,labels,'OptimizeHyperparameters','auto',...
+SVM_Optimize=fitcecoc(ULDA_Features,labelsnew,'OptimizeHyperparameters','auto',...
 'HyperparameterOptimizationOptions',struct('AcquisitionFunctionName','expected-improvement-plus','CVPartition',c,...
     'ShowPlots',false,'Verbose',0));
 BoxCon=table2array(SVM_Optimize.HyperparameterOptimizationResults.XAtMinObjective(1,2));
 KernelScale=table2array(SVM_Optimize.HyperparameterOptimizationResults.XAtMinObjective(1,3));
 
 t=templateSVM('BoxConstraint',BoxCon,'KernelScale',KernelScale);
-SVM_Model=fitcecoc(ULDA_Features,labels,'Learners',t);
+SVM_Model=fitcecoc(ULDA_Features,labelsnew,'Learners',t);
 SVM_FS_Model=fitcecoc(FS_Features,labels,'Learners',t);
 SVM_FS_ULDA_Model=fitcecoc(FS_ULDA_Features,labels,'Learners',t);
 
@@ -326,3 +338,68 @@ ACC_FS_ULDA_SVM=1-kfoldLoss(SVM_FS_ULDA_CVModel);   %Determines the accuracy of 
 
 %% ---------------------<Export Matlab Workspace>----------------------
 save('Classifiers.mat','NB_Model','LDA_Model','QDA_Model','kNN_Model','DT_Model','SVM_Model');
+
+
+%% --------------<Plotting 10-Fold Cross Validation Results>--------------
+BarLabels=categorical({'NB','LDA','QDA','kNN','DT','SVM'});  %Labels for Bar Graph
+
+Acc=[ACC_NB,ACC_FS_NB,ACC_FS_ULDA_NB;ACC_LDA,ACC_FS_LDA,ACC_FS_LDA_ULDA;...
+    ACC_QDA,ACC_FS_QDA,ACC_FS_ULDA_QDA;ACC_kNN,ACC_FS_kNN,ACC_FS_ULDA_kNN;...
+    ACC_DT,ACC_FS_DT,ACC_FS_ULDA_DT;ACC_SVM,ACC_FS_SVM,ACC_FS_ULDA_SVM];
+figure;
+bar(BarLabels,Acc);
+legend('ULDA','MRMR','MRMR and ULDA');
+xlabel('Classifier');
+ylabel('Average Accuracy');
+ylim([0.5 1.1]);
+title('Accuracy of 6 Classifiers With 3 Pre-Processing Approaches Using 10-fold Cross Validation');
+
+
+%% -----------------------<ANOVA On Test Data>----------------------------
+
+%The best performance is only with ULDA, so we perform ULDA on the test
+%data and then split this data into 20 partitions to check the accuracy of
+%each classifier and then perform an ANOVA
+
+%-------<Partition Test Data into 20 Parts and Evaluate Accuracy>----------
+NB_Test_ACC=TestAcc(ULDA_Features_Test,TestLabels,NB_Model);
+LDA_Test_ACC=TestAcc(ULDA_Features_Test,TestLabels,LDA_Model);
+QDA_Test_ACC=TestAcc(ULDA_Features_Test,TestLabels,QDA_Model);
+kNN_Test_ACC=TestAcc(ULDA_Features_Test,TestLabels,kNN_Model);
+DT_Test_ACC=TestAcc(ULDA_Features_Test,TestLabels,DT_Model);
+SVM_Test_ACC=TestAcc(ULDA_Features_Test,TestLabels,SVM_Model);
+
+ACCArray=[NB_Test_ACC',LDA_Test_ACC',QDA_Test_ACC',kNN_Test_ACC',DT_Test_ACC',SVM_Test_ACC'];
+
+%Performing an ANOVA
+anova1(ACCArray)
+
+%% ----------------------<Confusion Matrix>-------------------------------
+Result_LDA=predict(LDA_Model,ULDA_Features_Test);
+
+NewLabels=[];
+PredictLabels=[];
+for(i=[1:length(TestLabels)])
+    if(TestLabels(i)==1)
+        NewLabels{i}='Normal';
+        
+    else
+        NewLabels{i}='Sickle';
+    end
+end
+
+for(i=[1:length(Result_LDA)])
+    if(Result_LDA(i)==1)
+        PredictLabels{i}='Normal';
+        
+    else
+        PredictLabels{i}='Sickle';
+    end
+end
+
+
+
+cm=confusionchart(NewLabels,PredictLabels);
+cm.Title='Sickle Cell Classification Using ULDA';
+cm.RowSummary = 'row-normalized';
+cm.ColumnSummary = 'column-normalized';
