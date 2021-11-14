@@ -42,7 +42,7 @@ if isfile('Segmented.mat')
     load Segmented.mat
 else
     % Dataset needs to be segmented
-    segmentedDataset = segmentFullFieldImages(grayImages); 
+    segmentedDataset = segmentFullFieldImages(grayImages);
 end
 
 
@@ -62,23 +62,61 @@ end
 threshold = 0.05;   % Threshold to determine if image should be flagged for sickle cell
 
 % Pass it into classifier
-imageClassifications = zeros(numImages, 1);    % Array to hold final classifications of full images
+LDAImageClassifications = zeros(numImages, 1);    % Array to hold final classifications of full images
+DTImageClassifications = zeros(numImages, 1);    % Array to hold final classifications of full images
+QDAImageClassifications = zeros(numImages, 1);    % Array to hold final classifications of full images
+NBImageClassifications = zeros(numImages, 1);    % Array to hold final classifications of full images
+SVMImageClassifications = zeros(numImages, 1);    % Array to hold final classifications of full images
+kNNImageClassifications = zeros(numImages, 1);    % Array to hold final classifications of full images
 
 
 for i = 1:numImages
-
-currentFeatureSet = featureSet{i};  % Get current feature set
-numCells = height(currentFeatureSet);
-results = zeros(numCells, 1);  % Store results of each cell in image
-for j = 1:numCells
-    results(j) = predict(LDA_Model, currentFeatureSet(j, :));
-end
+    
+    currentFeatureSet = featureSet{i};  % Get current feature set
+    numCells = height(currentFeatureSet);
+    LDAResults = zeros(numCells, 1);  % Store results of each cell in image
+    DTResults = zeros(numCells, 1);  % Store results of each cell in image
+    QDAResults = zeros(numCells, 1);  % Store results of each cell in image
+    NBResults = zeros(numCells, 1);  % Store results of each cell in image
+    SVMResults = zeros(numCells, 1);  % Store results of each cell in image
+    kNNResults = zeros(numCells, 1);  % Store results of each cell in image
+    
+    
+    for j = 1:numCells
+        %         LDAResults(j) = predict(LDA_B_Model, currentFeatureSet(j, :));  % Classify new data
+        LDAResults(j) = predict(LDA_B_Model, currentFeatureSet(j, :));  % Classify new data
+        DTResults(j) = predict(DT_B_Model, currentFeatureSet(j, :));  % Classify new data
+        QDAResults(j) = predict(QDA_B_Model, currentFeatureSet(j, :));  % Classify new data
+        NBResults(j) = predict(NB_B_Model, currentFeatureSet(j, :));  % Classify new data
+        SVMResults(j) = predict(SVM_B_Model, currentFeatureSet(j, :));  % Classify new data
+        kNNResults(j) = predict(kNN_B_Model, currentFeatureSet(j, :));  % Classify new data
+    end
+    % Get number of sickle cells
+    LDANumSickle = length(find(LDAResults == 2));
+    DTNumSickle = length(find(DTResults == 2));
+    QDANumSickle = length(find(QDAResults == 2));
+    NBNumSickle = length(find(NBResults == 2));
+    SVMNumSickle = length(find(SVMResults == 2));
+    kNNNumSickle = length(find(kNNResults == 2));
+    
     % Compare ratio of normal to sickle to threshold
-    numSickle = length(find(results == 2));
-    ratio = numSickle/numCells;
-    imageClassifications(i) = ratio > threshold;
+    LDARatio = LDANumSickle/numCells;
+    DTRatio = DTNumSickle/numCells;
+    QDARatio = QDANumSickle/numCells;
+    NBRatio = NBNumSickle/numCells;
+    SVMRatio = SVMNumSickle/numCells;
+    kNNRatio = kNNNumSickle/numCells;
+    
+    % Store image classifications
+    LDAImageClassifications(i) = LDARatio > threshold;
+    DTImageClassifications(i) = DTRatio > threshold;
+    QDAImageClassifications(i) = QDARatio > threshold;
+    NBImageClassifications(i) = NBRatio > threshold;
+    SVMImageClassifications(i) = SVMRatio > threshold;
+    kNNImageClassifications(i) = kNNRatio > threshold;
 end
 
-
+classifierResults = [LDAImageClassifications DTImageClassifications QDAImageClassifications ...
+    NBImageClassifications SVMImageClassifications kNNImageClassifications];
 
 
