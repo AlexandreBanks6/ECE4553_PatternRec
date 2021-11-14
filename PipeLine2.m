@@ -41,23 +41,24 @@ grayImages = ConvRGB_to_GRAY(fullImages)';
 
 
 %% Segment full field images into individual cells
-
-if segmentImages
-    segmentedDataset = segmentFullFieldImages(grayImages);
-else
+if isfile('Segmented.mat')
+    % File exists
     load Segmented.mat
+else
+    % Dataset needs to be segmented
+    segmentedDataset = segmentFullFieldImages(grayImages); 
 end
+
 
 %% Feature extraction
-
-if extractFeatures
-    [featureSet, featureNames] = extractFullFeatures(segmentedDataset);
+if isfile('FeatureSet.mat')
+    % File exists
+    load FeatureSet.mat
 else
-    load Featureset.mat
+    % Features need to be extracted
+    [featureSet, featureNames] = extractFullFeatures(segmentedDataset);
 end
 
-
-%%% FEATURE SELECTION???????????????????????????????????????
 
 
 %% Use classifier to determine if blood sample has sickle cell anemia

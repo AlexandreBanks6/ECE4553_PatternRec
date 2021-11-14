@@ -10,6 +10,6 @@ for i = 1:numImages
     [featureSet{i}, featureNames{i}] = extractCellFeatures(cellImages');
 end
 
-save('Featureset.mat', 'featureSet', 'featureNames')    % Save variables
+save('FeatureSet.mat', 'featureSet', 'featureNames')    % Save variables
 end
 

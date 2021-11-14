@@ -1,12 +1,12 @@
 function [cells, numCells] = findCells(image)
-%%% Find cell clusters within a given image using the layer matrix.
+%%% Find cell clusters within a given image.
 
 minimumArea = 3000; % Minimum area to determine if object is a cell
 cellIdx = cell(100, 1);    % Preallocate cell index array
 
-tempImage = imbinarize(image, 'adaptive', 'Sensitivity', 1);    % binarize image with high sensitivity threshold
+binImage = imbinarize(image, 'adaptive', 'Sensitivity', 1);    % binarize image with high sensitivity threshold
 
-cellArray=imfill(~tempImage,'holes');    %Fills the holes
+cellArray=imfill(~binImage,'holes');    %Fills the holes
 
 CC = bwconncomp(cellArray);    % Find all connected components in image   
 
@@ -18,10 +18,6 @@ for i = 1:CC.NumObjects
     if area > minimumArea
         numCells = numCells + 1;
         cellIdx{numCells} = idx;    % Save cell index
-%         falseArr = false(size(image));   % Default logical array
-%         falseArr(idx) = 1;
-%         cells{k} = falseArr;
-%         k = k + 1;
     end
 end
 
