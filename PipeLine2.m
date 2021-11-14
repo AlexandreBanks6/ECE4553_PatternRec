@@ -7,10 +7,6 @@ close all
 clear
 clc
 
-%% Script parameters
-segmentImages = false;  % logical to determine if images need to be segmented again
-extractFeatures = false;    % logical to determine if features need to be extracted
-
 %% Load data
 
 load Classifiers.mat    % Get trained classifiers
