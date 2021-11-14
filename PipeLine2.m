@@ -7,6 +7,10 @@ close all
 clear
 clc
 
+%% Script parameters
+segmentImages = false;  % logical to determine if images need to be segmented again
+extractFeatures = false;    % logical to determine if features need to be extracted
+
 %% Load data
 
 load Classifiers.mat    % Get trained classifiers
@@ -28,7 +32,7 @@ for i = 1:numImages
     
     fullFiles{i} = dir([dirName imageName]);    % Get jpg file
     temp  = readimagefiles(fullFiles{i}, dirName);  % Load image
-    fullImages{i} = temp{1}; 
+    fullImages{i} = temp{1};
     
 end
 
@@ -38,40 +42,45 @@ grayImages = ConvRGB_to_GRAY(fullImages)';
 
 %% Segment full field images into individual cells
 
-segmented = segmentFullFieldImages(grayImages);
+if segmentImages
+    segmentedDataset = segmentFullFieldImages(grayImages);
+else
+    load Segmented.mat
+end
 
 %% Feature extraction
 
-% Get each individual cell from image
-cellImages = segmented{1};  % Get cell images for one full field image
+if extractFeatures
+    [featureSet, featureNames] = extractFullFeatures(segmentedDataset);
+else
+    load Featureset.mat
+end
 
-% Extract features
-[featureSet, featureNames] = extractCellFeatures(cellImages');
 
 %%% FEATURE SELECTION???????????????????????????????????????
 
-%% Using ULDA For Dimensionality Reduction
-PercGoal=95;    % 95 percent of total variance explained by projected data
-
-[ULDA_Features,explained,ProjDatUnCleaned]=ULDA(featureSet,labels,PercGoal);
 
 %% Use classifier to determine if blood sample has sickle cell anemia
 
+threshold = 0.05;   % Threshold to determine if image should be flagged for sickle cell
 
 % Pass it into classifier
-% exampleImage = cellImages{1};   % Get cell image
-% result = predict(ULDA_Features, exampleImage);
+imageClassifications = zeros(numImages, 1);    % Array to hold final classifications of full images
 
 
+for i = 1:numImages
 
-% Tally result
-% results(i) = result;  % (1 = normal, 2 = sickle)
-% Repeat until all cells in an image are done
-
-% Compare ratio of normal to sickle to threshold
-% numSickle = length(find(results == 1));
-% ratio = numSickle/numCells;
-% if ratio > threshold THEN image is sickle
+currentFeatureSet = featureSet{i};  % Get current feature set
+numCells = height(currentFeatureSet);
+results = zeros(numCells, 1);  % Store results of each cell in image
+for j = 1:numCells
+    results(j) = predict(LDA_Model, currentFeatureSet(j, :));
+end
+    % Compare ratio of normal to sickle to threshold
+    numSickle = length(find(results == 2));
+    ratio = numSickle/numCells;
+    imageClassifications(i) = ratio > threshold;
+end
 
 
 

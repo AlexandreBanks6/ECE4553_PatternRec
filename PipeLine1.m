@@ -229,15 +229,18 @@ ACC_FS_ULDA_NB=1-kfoldLoss(NB_FS_ULDA_CVModel);   %Determines average accuracy o
 
 %% -----------------------------<LDA>-----------------------------------
 
-LDA_Model=fitcdiscr(ULDA_Features,labels,'discrimtype','linear');   %Creates a linear model
+LDA_Model = fitcdiscr(FeatureArray,labels,'discrimtype','linear');   %Creates a linear model
+LDA_Model_ULDA=fitcdiscr(ULDA_Features,labels,'discrimtype','linear');   %Creates a linear model
 LDA_FS_Model=fitcdiscr(FS_Features,labels,'discrimtype','linear');   %Creates a linear model
 LDA_FS_ULDA_Model=fitcdiscr(FS_ULDA_Features,labels,'discrimtype','linear');   %Creates a linear model
 
 LDA_CVModel=crossval(LDA_Model);    %Cross Validates the model using 10-fold cross validation
+LDA_CVModel_ULDA=crossval(LDA_Model_ULDA);    %Cross Validates the model using 10-fold cross validation
 LDA_FS_CVModel=crossval(LDA_FS_Model);    %Cross Validates the model using 10-fold cross validation
 LDA_FS_ULDA_CVModel=crossval(LDA_FS_ULDA_Model);    %Cross Validates the model using 10-fold cross validation
 
-ACC_LDA=1-kfoldLoss(LDA_CVModel);   %Determines average accuracy of the lda model
+ACC_LDA = 1 - kfoldLoss(LDA_CVModel);
+ACC_LDA_ULDA=1-kfoldLoss(LDA_CVModel_ULDA);   %Determines average accuracy of the lda model
 ACC_FS_LDA=1-kfoldLoss(LDA_FS_CVModel);   %Determines average accuracy of the lda model
 ACC_FS_LDA_ULDA=1-kfoldLoss(LDA_FS_ULDA_CVModel);   %Determines average accuracy of the lda model
 

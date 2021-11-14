@@ -27,5 +27,7 @@ for i = 1:numImages
     segmentedDataset{i} = individualCells;    % Store dataset in cell array of image datasets
     
 end
+
+save('Segmented.mat', 'segmentedDataset')   % Save variable
 end
 
