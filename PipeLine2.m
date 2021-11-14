@@ -83,7 +83,6 @@ for i = 1:numImages
     
     
     for j = 1:numCells
-        %         LDAResults(j) = predict(LDA_B_Model, currentFeatureSet(j, :));  % Classify new data
         LDAResults(j) = predict(LDA_B_Model, currentFeatureSet(j, :));  % Classify new data
         DTResults(j) = predict(DT_B_Model, currentFeatureSet(j, :));  % Classify new data
         QDAResults(j) = predict(QDA_B_Model, currentFeatureSet(j, :));  % Classify new data

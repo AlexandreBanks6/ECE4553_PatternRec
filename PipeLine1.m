@@ -165,17 +165,26 @@ ACC_QDA_B=1-kfoldLoss(QDA_B_CVModel);   %Determines the accuracy of the lda mode
 %Finds the hyperparameters (k and distance measure) that minimuze the loss by using the
 %automatic hyperparameter optimization and 10-fold cross validation
 c=cvpartition(length(ULDA_Features(:,1)),'Kfold',10);
+c_B=cvpartition(length(FeatureArray(:,1)),'Kfold',10);
+
 kNN_Optimize=fitcknn(ULDA_Features,labelsnew,'OptimizeHyperparameters','auto',...
     'HyperparameterOptimizationOptions',struct('AcquisitionFunctionName','expected-improvement-plus','CVPartition',c,...
     'ShowPlots',false,'Verbose',0));
+kNN_B_Optimize=fitcknn(FeatureArray,labels,'OptimizeHyperparameters','auto',...
+    'HyperparameterOptimizationOptions',struct('AcquisitionFunctionName','expected-improvement-plus','CVPartition',c_B,...
+    'ShowPlots',false,'Verbose',0));
 k=kNN_Optimize.NumNeighbors; %Optimal number of neighbours
+k_B=kNN_B_Optimize.NumNeighbors; %Optimal number of neighbours
+
 DistMeas=kNN_Optimize.Distance;
+DistMeas_B=kNN_B_Optimize.Distance;
+
 
 %Train the kNN
 kNN_Model=fitcknn(ULDA_Features,labelsnew,'NumNeighbors',k,'Distance',DistMeas);    %Trains kNN with optimal hyperparameters
 kNN_FS_Model=fitcknn(FS_Features,labels,'NumNeighbors',k,'Distance',DistMeas);    %Trains kNN with optimal hyperparameters
 kNN_FS_ULDA_Model=fitcknn(FS_ULDA_Features,labels,'NumNeighbors',k,'Distance',DistMeas);    %Trains kNN with optimal hyperparameters
-kNN_B_Model=fitcknn(FeatureArray,labels,'NumNeighbors',k,'Distance',DistMeas);    %Trains kNN with optimal hyperparameters
+kNN_B_Model=fitcknn(FeatureArray,labels,'NumNeighbors',k_B,'Distance',DistMeas_B);    %Trains kNN with optimal hyperparameters
 
 kNN_CVModel=crossval(kNN_Model);    %Cross Validates the model using 10-fold cross validation
 kNN_FS_CVModel=crossval(kNN_FS_Model);    %Cross Validates the model using 10-fold cross validation
@@ -194,13 +203,17 @@ ACC_B_kNN=1-kfoldLoss(kNN_B_CVModel);   %Determines the accuracy of the lda mode
 DT_Optimize=fitctree(ULDA_Features,labelsnew,'OptimizeHyperparameters','auto',...
     'HyperparameterOptimizationOptions',struct('AcquisitionFunctionName','expected-improvement-plus','CVPartition',c,...
     'ShowPlots',false,'Verbose',0));
+DT_B_Optimize=fitctree(FeatureArray,labels,'OptimizeHyperparameters','auto',...
+    'HyperparameterOptimizationOptions',struct('AcquisitionFunctionName','expected-improvement-plus','CVPartition',c_B,...
+    'ShowPlots',false,'Verbose',0));
 MinLeaf=DT_Optimize.ModelParameters.MinLeaf;    %Minimum size of leaves
+MinLeaf_B=DT_B_Optimize.ModelParameters.MinLeaf;    %Minimum size of leaves
 
 %Train the Decision Tree
 DT_Model=fitctree(ULDA_Features,labelsnew,'MinLeafSize',MinLeaf);    %Trains kNN with optimal hyperparameters
 DT_FS_Model=fitctree(FS_Features,labels,'MinLeafSize',MinLeaf);    %Trains kNN with optimal hyperparameters
 DT_FS_ULDA_Model=fitctree(FS_ULDA_Features,labels,'MinLeafSize',MinLeaf);    %Trains kNN with optimal hyperparameters
-DT_B_Model=fitctree(FeatureArray,labels,'MinLeafSize',MinLeaf);    %Trains kNN with optimal hyperparameters
+DT_B_Model=fitctree(FeatureArray,labels,'MinLeafSize',MinLeaf_B);    %Trains kNN with optimal hyperparameters
 
 DT_CVModel=crossval(DT_Model);    %Cross Validates the model using 10-fold cross validation
 DT_FS_CVModel=crossval(DT_FS_Model);    %Cross Validates the model using 10-fold cross validation
@@ -220,14 +233,21 @@ ACC_DT_B=1-kfoldLoss(DT_B_CVModel);   %Determines the accuracy of the DT model
 SVM_Optimize=fitcecoc(ULDA_Features,labelsnew,'OptimizeHyperparameters','auto',...
 'HyperparameterOptimizationOptions',struct('AcquisitionFunctionName','expected-improvement-plus','CVPartition',c,...
     'ShowPlots',false,'Verbose',0));
+SVM_B_Optimize=fitcecoc(FeatureArray,labels,'OptimizeHyperparameters','auto',...
+'HyperparameterOptimizationOptions',struct('AcquisitionFunctionName','expected-improvement-plus','CVPartition',c_B,...
+    'ShowPlots',false,'Verbose',0));
 BoxCon=table2array(SVM_Optimize.HyperparameterOptimizationResults.XAtMinObjective(1,2));
+BoxCon_B=table2array(SVM_B_Optimize.HyperparameterOptimizationResults.XAtMinObjective(1,2));
 KernelScale=table2array(SVM_Optimize.HyperparameterOptimizationResults.XAtMinObjective(1,3));
+KernelScale_B=table2array(SVM_B_Optimize.HyperparameterOptimizationResults.XAtMinObjective(1,3));
 
 t=templateSVM('BoxConstraint',BoxCon,'KernelScale',KernelScale);
+t_B=templateSVM('BoxConstraint',BoxCon_B,'KernelScale',KernelScale_B);
+
 SVM_Model=fitcecoc(ULDA_Features,labelsnew,'Learners',t);
 SVM_FS_Model=fitcecoc(FS_Features,labels,'Learners',t);
 SVM_FS_ULDA_Model=fitcecoc(FS_ULDA_Features,labels,'Learners',t);
-SVM_B_Model=fitcecoc(FeatureArray,labels,'Learners',t);
+SVM_B_Model=fitcecoc(FeatureArray,labels,'Learners',t_B);
 
 SVM_CVModel=crossval(SVM_Model);    %Cross Validates the model using 10-fold cross validation
 SVM_FS_CVModel=crossval(SVM_FS_Model);    %Cross Validates the model using 10-fold cross validation
