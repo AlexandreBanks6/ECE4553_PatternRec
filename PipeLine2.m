@@ -115,7 +115,22 @@ for i = 1:numImages
     kNNImageClassifications(i) = kNNRatio > threshold;
 end
 
+% Summarize results
 classifierResults = [LDAImageClassifications DTImageClassifications QDAImageClassifications ...
     NBImageClassifications SVMImageClassifications kNNImageClassifications];
+
+% Store as strings for readability
+resultsStrings = strings(size(classifierResults));  % Strings array to hold results
+resultsStrings(:, :) = "Normal";    % Set all elements to normal
+sickleIdx = find(classifierResults);    % Find which elements are sickle
+resultsStrings(sickleIdx) = "Sickle";   % Set corresponding elements to sickle
+
+% Display classifications as histogram
+figure()
+barLabels = categorical({'LDA', 'DT', 'QDA', 'NB', 'SVM', 'kNN'});  % Labels for Bar Graph
+bar(barLabels, sum(classifierResults))
+xlabel('Classifier')
+ylabel('Number of Images Diagnosed with Sickle Cell')
+title('Number of Images Diagnosed with Sickle Cell for Each Classifier')
 
 

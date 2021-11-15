@@ -31,8 +31,6 @@ labels=labels';
 ImData=[circ_im,elong_im,other_im];
 
 
-
-
 %% Feature Extraction 
 %(We might want to look into normalizing by number of pixels)!!!
 ImGray=ConvRGB_to_GRAY(ImData); %Extracts the grayscale images
@@ -87,6 +85,7 @@ FS_Features = Features_mrmr(:, 1:numFeats); % Features after feature selection
 
 
 
+
 %% Using ULDA For Dimensionality Reduction
 PercGoal=95;    %95 percent of total variance explained by projected data
 [ULDA_Features,explained,ProjDatUnCleaned]=ULDA(FeatureArray,labels,PercGoal);
@@ -98,10 +97,37 @@ PercGoal=95;    %95 percent of total variance explained by projected data
 %used in an ANOVA to compare the accuracy between the classifiers
 cv=cvpartition(length(ULDA_Features(:,1)),'HoldOut',0.33);  %Train: 67%, Test: 33%
 index=cv.test;
+ULDA_Features_Original = ULDA_Features;
 ULDA_Features_Test=ULDA_Features(index,:);    %Testing data
 ULDA_Features=ULDA_Features(~index,:);    %Training data
 TestLabels=labels(index);   %Test labels
 labelsnew=labels(~index);  %Labels for training
+
+%% Compare distribution of data between FS and ULDA
+
+% Colour matrix
+[sickleRows, ~] = find(labels == 2);    % Find rows that correspond to sickle
+rgb = zeros(height(FS_Features), 3);
+rgb(sickleRows, 1) = 1; % Set sickle cell points to red
+
+% MRMR
+figure()
+scatter(FS_Features(:, 1), FS_Features(:, 2), [], rgb)
+grid on
+xlabel('Minimum Diameter')
+ylabel('Circularity')
+title('Scatter Plot of Two Highest Ranked Features for Individual Blood Cell Images')
+legend('Elongated')
+
+% ULDA
+figure()
+scatter(1:length(ULDA_Features_Original), ULDA_Features_Original, [], rgb)
+grid on
+xlabel('Observation Number')
+ylabel('LDA Feature 1')
+title('Scatter Plot of LDA Feature Space')
+legend('Elongated')
+
 
 
 %% ----------------------<Training Classifiers>------------------------
