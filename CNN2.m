@@ -18,9 +18,9 @@ ImageData=imageDatastore(ImageDatasetPath,'IncludeSubfolders',true,'LabelSource'
 inputSize=[80,80,1];    %Input image is an 80x80 grayscale
 FilterSize=3;
 ConvolutionStride=1;
-InitialNumFilter=8;
-pool_size=3;
-stride_size=3;
+InitialNumFilter=32;
+pool_size=4;
+stride_size=2;
 classSize=2;
 
 layers=[
@@ -60,7 +60,7 @@ layers=[
     batchNormalizationLayer
     reluLayer
     
-    convolution2dLayer(FilterSize,InitialNumFilter*2,'Padding','same','Stride',ConvolutionStride);   %Input size is the same as output size
+    convolution2dLayer(FilterSize,InitialNumFilter/2,'Padding','same','Stride',ConvolutionStride);   %Input size is the same as output size
     batchNormalizationLayer
     reluLayer
     
@@ -68,11 +68,11 @@ layers=[
     
     
     %Second 2 convolutional layers
-    convolution2dLayer(FilterSize,InitialNumFilter*4,'Padding','same','Stride',ConvolutionStride);   %Input size is the same as output size
+    convolution2dLayer(FilterSize,InitialNumFilter/4,'Padding','same','Stride',ConvolutionStride);   %Input size is the same as output size
     batchNormalizationLayer
     reluLayer
     
-    convolution2dLayer(FilterSize,InitialNumFilter,'Padding','same','Stride',ConvolutionStride);   %Input size is the same as output size
+    convolution2dLayer(FilterSize,InitialNumFilter/8,'Padding','same','Stride',ConvolutionStride);   %Input size is the same as output size
     batchNormalizationLayer
     reluLayer
     
@@ -93,7 +93,7 @@ layers=[
 %% Training Options
 options = trainingOptions('sgdm', ...
     'InitialLearnRate',0.01, ...
-    'MaxEpochs',4, ...
+    'MaxEpochs',16, ...
     'Shuffle','every-epoch', ...
     'ValidationData',CellValidate, ...
     'ValidationFrequency',30, ...
