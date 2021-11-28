@@ -1,4 +1,4 @@
-function [ProjDat,explained,ProjDatUnCleaned]=ULDA(Data,Labels,PercGoal)
+function [ProjDat,explained,ProjDatUnCleaned, W]=ULDA(Data,Labels,PercGoal)
 %{
 Function which uses LDA for dimensionality reduction, and returns the data
 projected into the new feature space and also the percentage that each
