@@ -55,6 +55,17 @@ else
     [featureSet, featureNames] = extractFullFeatures(segmentedDataset);
 end
 
+%% Project Features Onto ULDA Feature Space
+
+ULDAFeatures = cell(numImages, 1); % Array to hold ULDA feature space
+
+for i = 1:numImages
+    ULDAFeatures{i} = featureSet{i} * ULDA_W;
+end
+
+
+
+
 
 
 %% Use classifier to determine if blood sample has sickle cell anemia
@@ -72,7 +83,7 @@ kNNImageClassifications = zeros(numImages, 1);    % Array to hold final classifi
 
 for i = 1:numImages
     
-    currentFeatureSet = featureSet{i};  % Get current feature set
+    currentFeatureSet = ULDAFeatures{i};  % Get current feature set
     numCells = height(currentFeatureSet);
     LDAResults = zeros(numCells, 1);  % Store results of each cell in image
     DTResults = zeros(numCells, 1);  % Store results of each cell in image
@@ -83,13 +94,14 @@ for i = 1:numImages
     
     
     for j = 1:numCells
-        LDAResults(j) = predict(LDA_B_Model, currentFeatureSet(j, :));  % Classify new data
-        DTResults(j) = predict(DT_B_Model, currentFeatureSet(j, :));  % Classify new data
-        QDAResults(j) = predict(QDA_B_Model, currentFeatureSet(j, :));  % Classify new data
-        NBResults(j) = predict(NB_B_Model, currentFeatureSet(j, :));  % Classify new data
-        SVMResults(j) = predict(SVM_B_Model, currentFeatureSet(j, :));  % Classify new data
-        kNNResults(j) = predict(kNN_B_Model, currentFeatureSet(j, :));  % Classify new data
+        LDAResults(j) = predict(LDA_Model, currentFeatureSet(j, :));  % Classify new data
+        DTResults(j) = predict(DT_Model, currentFeatureSet(j, :));  % Classify new data
+        QDAResults(j) = predict(QDA_Model, currentFeatureSet(j, :));  % Classify new data
+        NBResults(j) = predict(NB_Model, currentFeatureSet(j, :));  % Classify new data
+        SVMResults(j) = predict(SVM_Model, currentFeatureSet(j, :));  % Classify new data
+        kNNResults(j) = predict(kNN_Model, currentFeatureSet(j, :));  % Classify new data
     end
+    
     % Get number of sickle cells
     LDANumSickle = length(find(LDAResults == 2));
     DTNumSickle = length(find(DTResults == 2));
