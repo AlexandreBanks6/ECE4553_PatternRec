@@ -4,18 +4,23 @@ clc
 
 %% Read In Grayscale Images
 
-ImageDatasetPath=fullfile('GrayImages'); %Folder containing subfolders for different classes
+%ImageDatasetPath=fullfile('GrayImages'); %Folder containing subfolders for different classes
 
-ImageData=imageDatastore(ImageDatasetPath,'IncludeSubfolders',true,'LabelSource','foldernames');
+%ImageData=imageDatastore(ImageDatasetPath,'IncludeSubfolders',true,'LabelSource','foldernames');
 
+% Set path
+cellDatasetPath = fullfile('Version 2, erythrocytesIDB 2021', 'Version 2, erythrocytesIDB 2021', 'erythrocytesIDB1', 'individual cells');
 
+% Load images
+cellDatastore = imageDatastore(cellDatasetPath, ... 
+    'IncludeSubfolders', true, 'LabelSource', 'foldernames');
 %% Split the dataset
-[CellTrain,CellValidate]=splitEachLabel(ImageData,0.7,'randomize');
+[CellTrain,CellValidate]=splitEachLabel(cellDatastore,0.7,'randomize');
 
 
 %% Setting layers of CNN
 %Setting Parameters
-inputSize=[80,80,1];    %Input image is an 80x80 grayscale
+inputSize=[80,80,3];    %Input image is an 80x80 grayscale
 FilterSize=3;
 ConvolutionStride=1;
 InitialNumFilter=32;
@@ -100,8 +105,13 @@ options = trainingOptions('sgdm', ...
     'Verbose',false, ...
     'Plots','training-progress');
 
+imageSize = size(readimage(cellDatastore, 1));
+augmentedTrainingSet = augmentedImageDatastore(imageSize, CellTrain, 'ColorPreprocessing', 'gray2rgb');
+augmentedTestSet = augmentedImageDatastore(imageSize, CellValidate, 'ColorPreprocessing', 'gray2rgb');
+
 %% Training Network
-net=trainNetwork(CellTrain,layers,options);
+net=trainNetwork(augmentedTrainingSet,layers,options);
+
 
 
 
