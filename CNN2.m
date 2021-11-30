@@ -15,12 +15,12 @@ cellDatasetPath = fullfile('Version 2, erythrocytesIDB 2021', 'Version 2, erythr
 cellDatastore = imageDatastore(cellDatasetPath, ... 
     'IncludeSubfolders', true, 'LabelSource', 'foldernames');
 %% Split the dataset
-[CellTrain,CellValidate]=splitEachLabel(cellDatastore,0.7,'randomize');
+[CellTrain,CellValidate]=splitEachLabel(cellDatastore,0.66,'randomize');
 
 
 %% Setting layers of CNN
 %Setting Parameters
-inputSize=[80,80,3];    %Input image is an 80x80 grayscale
+inputSize=[80,80,1];    %Input image is an 80x80 grayscale
 FilterSize=3;
 ConvolutionStride=1;
 InitialNumFilter=32;
@@ -93,6 +93,8 @@ layers=[
     
 ];
 
+augmentedTrainingSet = augmentedImageDatastore(inputSize, CellTrain, 'ColorPreprocessing', 'rgb2gray');
+augmentedTestSet = augmentedImageDatastore(inputSize, CellValidate, 'ColorPreprocessing', 'rgb2gray');
 
 
 %% Training Options
@@ -100,17 +102,17 @@ options = trainingOptions('sgdm', ...
     'InitialLearnRate',0.01, ...
     'MaxEpochs',16, ...
     'Shuffle','every-epoch', ...
-    'ValidationData',CellValidate, ...
+    'ValidationData',augmentedTrainingSet, ...
     'ValidationFrequency',30, ...
     'Verbose',false, ...
     'Plots','training-progress');
 
-imageSize = size(readimage(cellDatastore, 1));
-augmentedTrainingSet = augmentedImageDatastore(imageSize, CellTrain, 'ColorPreprocessing', 'gray2rgb');
-augmentedTestSet = augmentedImageDatastore(imageSize, CellValidate, 'ColorPreprocessing', 'gray2rgb');
 
 %% Training Network
 net=trainNetwork(augmentedTrainingSet,layers,options);
+
+%% Save The Trained Network
+save('NeuralNetResults.mat','net','augmentedTestSet');
 
 
 
