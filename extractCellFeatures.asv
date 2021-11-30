@@ -108,13 +108,13 @@ for(i=[1:nImages])
         X=images{i};
         SymmetryVec(i)=immse(X,fliplr(X));    %Calculates symmetry by flipping left and right
         SymmetryVec2(i)=immse(X,flipud(X));    %Calculates symmetry by flipping up and down
-        SymmetryVec3(i)=immse(X,imrotate(X,90));    %Calculates symmetry by rotating by 90 degrees 
+        SymmetryVec3(i)=immse(X,imrotate(X,45));    %Cal 
         
 end
 %Array of features
 featureSet=[PerimVec',AreaVec',CircularityVec',MinDiamVec',MaxDiamVec',ElipVec',ConvexHullVec',...
-    EccentricityVec',EquivDiamVec',SolidityVec',TextureVec',SymmetryVec',SymmetryVec2',SymmetryVec3'];
+    EccentricityVec',EquivDiamVec',SolidityVec',TextureVec',SymmetryVec'];
 featureNames={'Perim','Area','Circularity','MinDiam','MaxDiam','Elipticity','ConvexArea',...
-    'Eccentricity','EquivalentDiam','Solidity','Texture','Symmetry','SymmetryUpDown','SymmetryRotate'};
+    'Eccentricity','EquivalentDiam','Solidity','Texture','Symmetry'};
 end
 

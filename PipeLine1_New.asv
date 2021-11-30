@@ -91,7 +91,7 @@ mRMR_Features_Percentage=100*idxScores(1:numFeats)/totalScore;%(score(idx(1:numF
 
 PercGoal=95;    %95 percent of total variance explained by projected data
 %mRMR Reduced Features
-[ULDA_mRMR,explained,ProjDatUnCleaned,ULDA_Weight]=ULDA(mRMR_Features,labels,PercGoal);
+[ULDA_mRMR,explained,ProjDatUnCleaned,~]=ULDA(mRMR_Features,labels,PercGoal);
 
 %SFS Reduced Features
 [ULDA_SFS,FS_explained,FS_ProjDatUnCleaned, ~]=ULDA(SFS_Features,labels,PercGoal);
@@ -402,7 +402,7 @@ ACC_SVM_PCA_SFS=1-kfoldLoss(crossval(SVM_PCA_SFS_Model));   %Determines the accu
 
 
 %% ---------------------<Export Matlab Workspace>----------------------
-save('Classifiers_new.mat','NB_ULDA_mRMR_Model','LDA_ULDA_mRMR_Model','QDA_ULDA_mRMR_model','kNN_ULDA_mRMR_model','DT_ULDA_mRMR_model','SVM_ULDA_mRMR_model', 'ULDA_Weight');
+save('Classifiers.mat','NB_Model','LDA_Model','QDA_Model','kNN_Model','DT_Model','SVM_Model', 'ULDA_W');
 
 
 %% --------------<Plotting 10-Fold Cross Validation Results>--------------
