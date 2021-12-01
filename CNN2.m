@@ -83,7 +83,7 @@ options = trainingOptions('sgdm', ...
 net=trainNetwork(augmentedTrainingSet,layers,options);
 
 %% Save The Trained Network
-save('NeuralNetResults.mat','net','augmentedTestSet');
+save('NeuralNetResults.mat','net','augmentedTestSet', 'cellTrain');
 
 
 
