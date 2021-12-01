@@ -1,7 +1,7 @@
 %%% PipeLine2.m
 %%% Christian Morrell, Alexandre Banks
 %%% ECE4553 Project
-%%% Integrate image segmentation and pipeline 1
+%%% Integrate image segmentation and Pipeline1.m
 
 close all
 clear
@@ -9,7 +9,7 @@ clc
 
 %% Load data
 
-load Classifiers.mat    % Get trained classifiers
+load Classifiers_new.mat    % Get trained classifiers
 
 % Database 2 (full field images)
 numImages = 50; % Number of images in database 2
@@ -55,6 +55,20 @@ else
     [featureSet, featureNames] = extractFullFeatures(segmentedDataset);
 end
 
+%% Feature ranking
+
+% rankedFeats = featureSet(:, featureIdx);  % features ranked based off of mRMR algorithm
+
+rankedFeats = cell(size(featureSet));   % features ranked based off of mRMR algorithm
+mRMRFeats = cell(size(featureSet)); % Features after feature selection
+
+for i = 1:numImages
+    rankedFeats{i} = featureSet{i}(:, featureIdx);
+    mRMRFeats{i} = rankedFeats{i}(:, 1:numFeats);
+end
+
+% mRMRFeats = Features_mrmr(:, 1:numFeats); % Features after feature selection
+
 %% Project Features Onto ULDA Feature Space
 
 ULDAFeatures = cell(numImages, 1); % Array to hold ULDA feature space
@@ -62,10 +76,6 @@ ULDAFeatures = cell(numImages, 1); % Array to hold ULDA feature space
 for i = 1:numImages
     ULDAFeatures{i} = featureSet{i} * ULDA_W;
 end
-
-
-
-
 
 
 %% Use classifier to determine if blood sample has sickle cell anemia
@@ -94,12 +104,12 @@ for i = 1:numImages
     
     
     for j = 1:numCells
-        LDAResults(j) = predict(LDA_Model, currentFeatureSet(j, :));  % Classify new data
-        DTResults(j) = predict(DT_Model, currentFeatureSet(j, :));  % Classify new data
-        QDAResults(j) = predict(QDA_Model, currentFeatureSet(j, :));  % Classify new data
-        NBResults(j) = predict(NB_Model, currentFeatureSet(j, :));  % Classify new data
-        SVMResults(j) = predict(SVM_Model, currentFeatureSet(j, :));  % Classify new data
-        kNNResults(j) = predict(kNN_Model, currentFeatureSet(j, :));  % Classify new data
+        LDAResults(j) = predict(LDA_ULDA_mRMR_Model, currentFeatureSet(j, :));  % Classify new data
+        DTResults(j) = predict(DT_ULDA_mRMR_Model, currentFeatureSet(j, :));  % Classify new data
+        QDAResults(j) = predict(QDA_ULDA_mRMR_Model, currentFeatureSet(j, :));  % Classify new data
+        NBResults(j) = predict(NB_ULDA_mRMR_Model, currentFeatureSet(j, :));  % Classify new data
+        SVMResults(j) = predict(SVM_ULDA_mRMR_Model, currentFeatureSet(j, :));  % Classify new data
+        kNNResults(j) = predict(kNN_ULDA_mRMR_Model, currentFeatureSet(j, :));  % Classify new data
     end
     
     % Get number of sickle cells

@@ -4,15 +4,11 @@ clc
 
 %% Read In Grayscale Images
 
-%ImageDatasetPath=fullfile('GrayImages'); %Folder containing subfolders for different classes
-
-%ImageData=imageDatastore(ImageDatasetPath,'IncludeSubfolders',true,'LabelSource','foldernames');
-
 % Set path
 cellDatasetPath = fullfile('Version 2, erythrocytesIDB 2021', 'Version 2, erythrocytesIDB 2021', 'erythrocytesIDB1', 'individual cells');
 
 % Load images
-cellDatastore = imageDatastore(cellDatasetPath, ... 
+cellDatastore = imageDatastore(cellDatasetPath, ...
     'IncludeSubfolders', true, 'LabelSource', 'foldernames');
 %% Split the dataset
 [CellTrain,CellValidate]=splitEachLabel(cellDatastore,0.66,'randomize');
@@ -29,68 +25,43 @@ stride_size=2;
 classSize=2;
 
 layers=[
-%     imageInputLayer(inputSize); %Defines the input size
-%     
-%     convolution2dLayer(FilterSize,InitialNumFilter,'Padding','same'); %,'Stride',ConvolutionStride);   %Input size is the same as output size
-%     batchNormalizationLayer
-%     reluLayer
-%     
-%     maxPooling2dLayer(pool_size,'Stride',stride_size);
-%     
-%     
-%     
-%     convolution2dLayer(FilterSize,(1/2)*InitialNumFilter,'Padding','same');   %Input size is the same as output size
-%     batchNormalizationLayer
-%     reluLayer
-%     
-%     maxPooling2dLayer(pool_size,'Stride',stride_size);
-%     
-%     
-%     
-%     convolution2dLayer(FilterSize,(1/4)*InitialNumFilter,'Padding','same');   %Input size is the same as output size
-%     batchNormalizationLayer
-%     reluLayer
-%     
-%     fullyConnectedLayer(classSize)
-%     softmaxLayer
-%     classificationLayer
     
 
-    %-------------------<Classifer Resembling LetNet>----------------------
-    
-    imageInputLayer(inputSize); %Defines the input size
-    
-    %First 2 convolutional layers
-    convolution2dLayer(FilterSize,InitialNumFilter,'Padding','same','Stride',ConvolutionStride);   %Input size is the same as output size
-    batchNormalizationLayer
-    reluLayer
-    
-    convolution2dLayer(FilterSize,InitialNumFilter/2,'Padding','same','Stride',ConvolutionStride);   %Input size is the same as output size
-    batchNormalizationLayer
-    reluLayer
-    
-    maxPooling2dLayer(pool_size,'Stride',stride_size);
-    
-    
-    %Second 2 convolutional layers
-    convolution2dLayer(FilterSize,InitialNumFilter/4,'Padding','same','Stride',ConvolutionStride);   %Input size is the same as output size
-    batchNormalizationLayer
-    reluLayer
-    
-    convolution2dLayer(FilterSize,InitialNumFilter/8,'Padding','same','Stride',ConvolutionStride);   %Input size is the same as output size
-    batchNormalizationLayer
-    reluLayer
-    
-    maxPooling2dLayer(pool_size,'Stride',stride_size);
-    
-     
-    
-    fullyConnectedLayer(classSize)   
-    fullyConnectedLayer(classSize)
-    softmaxLayer
-    classificationLayer
-    
-    
+%-------------------<Classifer Resembling LetNet>----------------------
+
+imageInputLayer(inputSize); %Defines the input size
+
+%First 2 convolutional layers
+convolution2dLayer(FilterSize,InitialNumFilter,'Padding','same','Stride',ConvolutionStride);   %Input size is the same as output size
+batchNormalizationLayer
+reluLayer
+
+convolution2dLayer(FilterSize,InitialNumFilter/2,'Padding','same','Stride',ConvolutionStride);   %Input size is the same as output size
+batchNormalizationLayer
+reluLayer
+
+maxPooling2dLayer(pool_size,'Stride',stride_size);
+
+
+%Second 2 convolutional layers
+convolution2dLayer(FilterSize,InitialNumFilter/4,'Padding','same','Stride',ConvolutionStride);   %Input size is the same as output size
+batchNormalizationLayer
+reluLayer
+
+convolution2dLayer(FilterSize,InitialNumFilter/8,'Padding','same','Stride',ConvolutionStride);   %Input size is the same as output size
+batchNormalizationLayer
+reluLayer
+
+maxPooling2dLayer(pool_size,'Stride',stride_size);
+
+
+
+fullyConnectedLayer(classSize)
+fullyConnectedLayer(classSize)
+softmaxLayer
+classificationLayer
+
+
 ];
 
 augmentedTrainingSet = augmentedImageDatastore(inputSize, CellTrain, 'ColorPreprocessing', 'rgb2gray');
