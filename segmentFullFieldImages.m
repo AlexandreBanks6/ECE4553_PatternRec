@@ -8,7 +8,7 @@
 function segmentedDataset = segmentFullFieldImages(images)
 
 numImages = length(images); % Get number of images in dataset
-imageWidth = 300;
+imageWidth = 80;
 
 
 segmentedDataset = cell(numImages, 1);   % Array to hold dataset of full field images divided into individual cells
@@ -24,8 +24,13 @@ for i = 1:numImages
     for j = 1:numCells
         % Store each individual cell image in dataset
         cellImage = newCellImage(image, cells{j});  % Crop image to show one cell
-        if (width(cellImage) == imageWidth && height(cellImage) == imageWidth)
-            % Not a border cell
+        %         if (width(cellImage) == imageWidth && height(cellImage) == imageWidth)
+        %             % Not a border cell
+        %             individualCells{cellIterator} = cellImage;
+        %             cellIterator = cellIterator + 1;
+        %         end
+        if (width(cellImage) == height(cellImage))
+            % Symmetric
             individualCells{cellIterator} = cellImage;
             cellIterator = cellIterator + 1;
         end
