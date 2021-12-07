@@ -313,12 +313,13 @@ title('Accuracy of 6 Classifiers With 3 Pre-Processing Approaches Using 10-fold 
 %each classifier and then perform an ANOVA
 
 %-------<Partition Test Data into 20 Parts and Evaluate Accuracy>----------
-NB_Test_ACC=TestAcc(ULDA_Features_Test,TestLabels,NB_Model);
-LDA_Test_ACC=TestAcc(ULDA_Features_Test,TestLabels,LDA_Model);
-QDA_Test_ACC=TestAcc(ULDA_Features_Test,TestLabels,QDA_Model);
-kNN_Test_ACC=TestAcc(ULDA_Features_Test,TestLabels,kNN_Model);
-DT_Test_ACC=TestAcc(ULDA_Features_Test,TestLabels,DT_Model);
-SVM_Test_ACC=TestAcc(ULDA_Features_Test,TestLabels,SVM_Model);
+numParts = 20;
+NB_Test_ACC=TestAcc(ULDA_Features_Test,TestLabels,NB_Model, numParts);
+LDA_Test_ACC=TestAcc(ULDA_Features_Test,TestLabels,LDA_Model, numParts);
+QDA_Test_ACC=TestAcc(ULDA_Features_Test,TestLabels,QDA_Model, numParts);
+kNN_Test_ACC=TestAcc(ULDA_Features_Test,TestLabels,kNN_Model, numParts);
+DT_Test_ACC=TestAcc(ULDA_Features_Test,TestLabels,DT_Model, numParts);
+SVM_Test_ACC=TestAcc(ULDA_Features_Test,TestLabels,SVM_Model, numParts);
 
 ACCArray=[NB_Test_ACC',LDA_Test_ACC',QDA_Test_ACC',kNN_Test_ACC',DT_Test_ACC',SVM_Test_ACC'];
 

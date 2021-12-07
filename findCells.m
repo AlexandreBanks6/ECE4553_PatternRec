@@ -1,7 +1,8 @@
 function [cells, numCells] = findCells(image)
 %%% Find cell clusters within a given image.
 
-minimumArea = 3000; % Minimum area to determine if object is a cell
+% minimumArea = 3000; % Minimum area to determine if object is a cell
+minimumArea = width(image);
 cellIdx = cell(100, 1);    % Preallocate cell index array
 
 binImage = imbinarize(image, 'adaptive', 'Sensitivity', 1);    % binarize image with high sensitivity threshold
