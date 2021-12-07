@@ -1,10 +1,21 @@
 %{
-Title: PipeLine1
+Title: PipeLine1_New
 Author: Alexandre Banks, Christian  Morrel
 Description: Extracts features from individual blood cell images, uses features selection,
 and dimensionality reduction, and trains/evaluates classifiers
-(NaiveBays,LDA,QDA,kNN,parzen,dicision trees, and SVM). There are three
-class labels: circular,elongated (sickle cell),other 
+(NaiveBays,LDA,QDA,kNN,parzen,dicision trees, and SVM). Two types of
+classification algorithms (sequential feature selection and minimum
+redundancy maximum relavance) are tested with different combinations with two
+dimensionality reduction approaches (principal component analysis and
+fisher's linear discriminant analysis). The pre-processing approach that
+returns the best accuracies for the given classifiers is selected and
+further analysis is conducted on this pipeline.
+ There are two
+class labels: elongated,and heatlhy (healthy contains both circular and abnormal shaped cells) 
+This script also plots various performance metrics of the classifiers
+including a confusion matrix, an ANOVA comparing the classifiers on testing
+data, and a plot of the classifier accuracies for various pre-processing
+approaches.
 Date:November 9th, 2021
 Affiliation: University of New Brunswick, ECE 4553
 

@@ -3,8 +3,9 @@ Title: PipeLine1
 Author: Alexandre Banks, Christian  Morrel
 Description: Extracts features from individual blood cell images, uses features selection,
 and dimensionality reduction, and trains/evaluates classifiers
-(NaiveBays,LDA,QDA,kNN,parzen,dicision trees, and SVM). There are three
-class labels: circular,elongated (sickle cell),other 
+(NaiveBays,LDA,QDA,kNN,parzen,dicision trees, and SVM). There are two
+class labels: elongated,and heatlhy (healthy contains both circular and abnormal shaped cells) 
+This script also plots various performance metrics of the cl
 Date:November 9th, 2021
 Affiliation: University of New Brunswick, ECE 4553
 
@@ -61,10 +62,10 @@ end
 
 %% Feature Ranking Using MRMR Algorithm
 
-[featureIdx,score]=fscmrmr(FeatureArray,labels);
+[idx,score]=fscmrmr(FeatureArray,labels);
 
-Features_mrmr=FeatureArray(:,featureIdx);
-idxScores = score(featureIdx);
+Features_mrmr=FeatureArray(:,idx);
+idxScores = score(idx);
 
 % Plot of scores
 figure()
@@ -83,7 +84,7 @@ for i = 1:length(score)
 end
 
 mRMR_Features = Features_mrmr(:, 1:numFeats); % Features after feature selection
-mRMR_Feature_Names=FeatNames(featureIdx(1:numFeats));
+mRMR_Feature_Names=FeatNames(idx(1:numFeats));
 mRMR_Features_Percentage=100*idxScores(1:numFeats)/totalScore;%(score(idx(1:numFeats))/totalScore)*100;
 
 
@@ -123,6 +124,8 @@ cv=cvpartition(length(PCA_mRMR(:,1)),'HoldOut',0.33);  %Train: 67%, Test: 33%
 index=cv.test;
 
 %Test Data
+OriginalImages_Test=ImData(index);
+
 ULDA_mRMR_Test=ULDA_mRMR(index,:);
 ULDA_SFS_Test=ULDA_SFS(index,:);
 PCA_mRMR_Test=PCA_mRMR(index,:);
@@ -208,13 +211,13 @@ ACC_LDA_PCA_SFS=1-kfoldLoss(crossval(LDA_PCA_SFS_Model));   %Determines average 
 % PCA_mRMR_Train
 % PCA_SFS_Train
 
-QDA_ULDA_mRMR_Model=fitcdiscr(ULDA_mRMR_Train,TrainLabels,'discrimtype','quadratic');   %Creates a quadratic model
+QDA_ULDA_mRMR_model=fitcdiscr(ULDA_mRMR_Train,TrainLabels,'discrimtype','quadratic');   %Creates a quadratic model
 QDA_ULDA_SFS_model=fitcdiscr(ULDA_SFS_Train,TrainLabels,'discrimtype','quadratic');   %Creates a quadratic model
 QDA_PCA_mRMR_Model=fitcdiscr(PCA_mRMR_Train,TrainLabels,'discrimtype','quadratic');   %Creates a quadratic model
 QDA_PCA_SFS_Model=fitcdiscr(PCA_SFS_Train,TrainLabels,'discrimtype','quadratic');   %Creates a quadratic model
 
 
-ACC_QDA_ULDA_mRMR=1-kfoldLoss(crossval(QDA_ULDA_mRMR_Model));   %Determines the accuracy of the lda model
+ACC_QDA_ULDA_mRMR=1-kfoldLoss(crossval(QDA_ULDA_mRMR_model));   %Determines the accuracy of the lda model
 ACC_QDA_ULDA_SFS=1-kfoldLoss(crossval(QDA_ULDA_SFS_model));   %Determines the accuracy of the lda model
 ACC_QDA_PCA_mRMR=1-kfoldLoss(crossval(QDA_PCA_mRMR_Model));   %Determines the accuracy of the lda model
 ACC_QDA_PCA_SFS=1-kfoldLoss(crossval(QDA_PCA_SFS_Model));   %Determines the accuracy of the lda model
@@ -261,13 +264,13 @@ DistMeas4=kNN_Optimize.Distance;
 
 %Train the kNN
 
-kNN_ULDA_mRMR_Model=fitcknn(ULDA_mRMR_Train,TrainLabels,'NumNeighbors',k1,'Distance',DistMeas1);   %Creates a quadratic model
+kNN_ULDA_mRMR_model=fitcknn(ULDA_mRMR_Train,TrainLabels,'NumNeighbors',k1,'Distance',DistMeas1);   %Creates a quadratic model
 kNN_ULDA_SFS_model=fitcknn(ULDA_SFS_Train,TrainLabels,'NumNeighbors',k2,'Distance',DistMeas2);   %Creates a quadratic model
 kNN_PCA_mRMR_Model=fitcknn(PCA_mRMR_Train,TrainLabels,'NumNeighbors',k3,'Distance',DistMeas3);   %Creates a quadratic model
 kNN_PCA_SFS_Model=fitcknn(PCA_SFS_Train,TrainLabels,'NumNeighbors',k4,'Distance',DistMeas4);   %Creates a quadratic model
 
 
-ACC_kNN_ULDA_mRMR=1-kfoldLoss(crossval(kNN_ULDA_mRMR_Model));   %Determines the accuracy of the lda model
+ACC_kNN_ULDA_mRMR=1-kfoldLoss(crossval(kNN_ULDA_mRMR_model));   %Determines the accuracy of the lda model
 ACC_kNN_ULDA_SFS=1-kfoldLoss(crossval(kNN_ULDA_SFS_model));   %Determines the accuracy of the lda model
 ACC_kNN_PCA_mRMR=1-kfoldLoss(crossval(kNN_PCA_mRMR_Model));   %Determines the accuracy of the lda model
 ACC_kNN_PCA_SFS=1-kfoldLoss(crossval(kNN_PCA_SFS_Model));   %Determines the accuracy of the lda model
@@ -307,13 +310,13 @@ MinLeaf4=DT_Optimize.ModelParameters.MinLeaf;    %Minimum size of leaves
 
 
 
-DT_ULDA_mRMR_Model=fitctree(ULDA_mRMR_Train,TrainLabels,'MinLeafSize',MinLeaf1);   %Creates a quadratic model
+DT_ULDA_mRMR_model=fitctree(ULDA_mRMR_Train,TrainLabels,'MinLeafSize',MinLeaf1);   %Creates a quadratic model
 DT_ULDA_SFS_model=fitctree(ULDA_SFS_Train,TrainLabels,'MinLeafSize',MinLeaf2);   %Creates a quadratic model
 DT_PCA_mRMR_Model=fitctree(PCA_mRMR_Train,TrainLabels,'MinLeafSize',MinLeaf3);   %Creates a quadratic model
 DT_PCA_SFS_Model=fitctree(PCA_SFS_Train,TrainLabels,'MinLeafSize',MinLeaf4);   %Creates a quadratic model
 
 
-ACC_DT_ULDA_mRMR=1-kfoldLoss(crossval(DT_ULDA_mRMR_Model));   %Determines the accuracy of the lda model
+ACC_DT_ULDA_mRMR=1-kfoldLoss(crossval(DT_ULDA_mRMR_model));   %Determines the accuracy of the lda model
 ACC_DT_ULDA_SFS=1-kfoldLoss(crossval(DT_ULDA_SFS_model));   %Determines the accuracy of the lda model
 ACC_DT_PCA_mRMR=1-kfoldLoss(crossval(DT_PCA_mRMR_Model));   %Determines the accuracy of the lda model
 ACC_DT_PCA_SFS=1-kfoldLoss(crossval(DT_PCA_SFS_Model));   %Determines the accuracy of the lda model
@@ -388,13 +391,13 @@ t4=templateSVM('BoxConstraint',BoxCon4,'KernelScale',KernelScale4);
 
 
 
-SVM_ULDA_mRMR_Model=fitcecoc(ULDA_mRMR_Train,TrainLabels,'Learners',t1);   %Creates a quadratic model
+SVM_ULDA_mRMR_model=fitcecoc(ULDA_mRMR_Train,TrainLabels,'Learners',t1);   %Creates a quadratic model
 SVM_ULDA_SFS_model=fitcecoc(ULDA_SFS_Train,TrainLabels,'Learners',t2);   %Creates a quadratic model
 SVM_PCA_mRMR_Model=fitcecoc(PCA_mRMR_Train,TrainLabels,'Learners',t3);   %Creates a quadratic model
 SVM_PCA_SFS_Model=fitcecoc(PCA_SFS_Train,TrainLabels,'Learners',t4);   %Creates a quadratic model
 
 
-ACC_SVM_ULDA_mRMR=1-kfoldLoss(crossval(SVM_ULDA_mRMR_Model));   %Determines the accuracy of the lda model
+ACC_SVM_ULDA_mRMR=1-kfoldLoss(crossval(SVM_ULDA_mRMR_model));   %Determines the accuracy of the lda model
 ACC_SVM_ULDA_SFS=1-kfoldLoss(crossval(SVM_ULDA_SFS_model));   %Determines the accuracy of the lda model
 ACC_SVM_PCA_mRMR=1-kfoldLoss(crossval(SVM_PCA_mRMR_Model));   %Determines the accuracy of the lda model
 ACC_SVM_PCA_SFS=1-kfoldLoss(crossval(SVM_PCA_SFS_Model));   %Determines the accuracy of the lda model
@@ -402,9 +405,7 @@ ACC_SVM_PCA_SFS=1-kfoldLoss(crossval(SVM_PCA_SFS_Model));   %Determines the accu
 
 
 %% ---------------------<Export Matlab Workspace>----------------------
-save('Classifiers_new.mat','NB_ULDA_mRMR_Model','LDA_ULDA_mRMR_Model', ... 
-    'QDA_ULDA_mRMR_Model','kNN_ULDA_mRMR_Model','DT_ULDA_mRMR_Model', ... 
-    'SVM_ULDA_mRMR_Model', 'ULDA_Weight', 'numFeats', 'featureIdx');
+save('Classifiers_new.mat','NB_ULDA_mRMR_Model','LDA_ULDA_mRMR_Model','QDA_ULDA_mRMR_model','kNN_ULDA_mRMR_model','DT_ULDA_mRMR_model','SVM_ULDA_mRMR_model', 'ULDA_Weight');
 
 
 %% --------------<Plotting 10-Fold Cross Validation Results>--------------
@@ -455,9 +456,9 @@ Acc_Curve=zeros(1,length(PercentFeatures)); %Vector containing the accuracies fo
 for(j=[1:length(PercentFeatures)])
     
     %--------------------<mRMR Algorithm>------------------------
-    [featureIdx,score]=fscmrmr(FeatureArray,labels);
-    Features_mrmr=FeatureArray(:,featureIdx);
-    idxScores = score(featureIdx);
+    [idx,score]=fscmrmr(FeatureArray,labels);
+    Features_mrmr=FeatureArray(:,idx);
+    idxScores = score(idx);
 
     % Find number of features to include
     featurePerc = PercentFeatures(j);   % Percentage of feature score to retain
@@ -515,30 +516,23 @@ title('Percentage of mRMR Score For Each Feature');
 %data and then split this data into 20 partitions to check the accuracy of
 %each classifier and then perform an ANOVA
 
-load('Classifiers_new.mat')
-load('NeuralNetResults.mat')
-
-%-------<Partition Test Data into 10 Parts and Evaluate Accuracy>----------
-numParts = 5;
-NB_Test_ACC=TestAcc(ULDA_mRMR_Test,TestLabels,NB_ULDA_mRMR_Model, numParts);
-LDA_Test_ACC=TestAcc(ULDA_mRMR_Test,TestLabels,LDA_ULDA_mRMR_Model, numParts);
-QDA_Test_ACC=TestAcc(ULDA_mRMR_Test,TestLabels,QDA_ULDA_mRMR_Model, numParts);
-kNN_Test_ACC=TestAcc(ULDA_mRMR_Test,TestLabels,kNN_ULDA_mRMR_Model, numParts);
-DT_Test_ACC=TestAcc(ULDA_mRMR_Test,TestLabels,DT_ULDA_mRMR_Model, numParts);
-SVM_Test_ACC=TestAcc(ULDA_mRMR_Test,TestLabels,SVM_ULDA_mRMR_Model, numParts);
-
-CNNTest = cell(augmentedTestSet.NumObservations, 1);
-for i = 1:augmentedTestSet.NumObservations
-    CNNTest{i} = readimage(augmentedTestSet.Files(i);
-end
+%-------<Partition Test Data into 20 Parts and Evaluate Accuracy>----------
+NB_Test_ACC=TestAcc(ULDA_Features_Test,TestLabels,NB_Model);
+LDA_Test_ACC=TestAcc(ULDA_Features_Test,TestLabels,LDA_Model);
+QDA_Test_ACC=TestAcc(ULDA_Features_Test,TestLabels,QDA_Model);
+kNN_Test_ACC=TestAcc(ULDA_Features_Test,TestLabels,kNN_Model);
+DT_Test_ACC=TestAcc(ULDA_Features_Test,TestLabels,DT_Model);
+SVM_Test_ACC=TestAcc(ULDA_Features_Test,TestLabels,SVM_Model);
 
 ACCArray=[NB_Test_ACC',LDA_Test_ACC',QDA_Test_ACC',kNN_Test_ACC',DT_Test_ACC',SVM_Test_ACC'];
 
 %Performing an ANOVA
-[p, tbl, stats] = anova1(ACCArray);
+anova1(ACCArray)
 
 %% ----------------------<Confusion Matrix>-------------------------------
-Result_SVM=predict(SVM_ULDA_mRMR_Model,ULDA_mRMR_Test);
+load('Classifiers_new.mat');
+
+Result_LDA=predict(SVM_ULDA_mRMR_model,ULDA_mRMR_Test);
 
 NewLabels=[];
 PredictLabels=[];
@@ -551,8 +545,8 @@ for(i=[1:length(TestLabels)])
     end
 end
 
-for(i=[1:length(Result_SVM)])
-    if(Result_SVM(i)==1)
+for(i=[1:length(Result_LDA)])
+    if(Result_LDA(i)==1)
         PredictLabels{i}='Normal';
         
     else
@@ -561,8 +555,22 @@ for(i=[1:length(Result_SVM)])
 end
 
 
-figure;
+
 cm=confusionchart(NewLabels,PredictLabels);
-cm.Title='Sickle Cell Classification of SVM Classifier Using ULDA and mRMR';
+cm.Title='Sickle Cell Classification Using an SVM with ULDA and mRMR';
 cm.RowSummary = 'row-normalized';
 cm.ColumnSummary = 'column-normalized';
+
+% Finding and plotting misclassified images
+
+%Images Classified as sickle but actually normal
+Type1Error=(strcmp(NewLabels,'Normal')==true)&(strcmp(PredictLabels,'Sickle')==true);
+Type2Error=(strcmp(NewLabels,'Sickle')==true)&(strcmp(PredictLabels,'Normal')==true);
+
+figure;
+montage(OriginalImages_Test(Type1Error));
+title('Type 1 Errors');
+
+figure;
+montage(OriginalImages_Test(Type2Error));
+title('Type 2 Errors');
