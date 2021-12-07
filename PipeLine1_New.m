@@ -123,6 +123,8 @@ cv=cvpartition(length(PCA_mRMR(:,1)),'HoldOut',0.33);  %Train: 67%, Test: 33%
 index=cv.test;
 
 %Test Data
+OriginalImages_Test=ImData(index);
+
 ULDA_mRMR_Test=ULDA_mRMR(index,:);
 ULDA_SFS_Test=ULDA_SFS(index,:);
 PCA_mRMR_Test=PCA_mRMR(index,:);
@@ -527,7 +529,9 @@ ACCArray=[NB_Test_ACC',LDA_Test_ACC',QDA_Test_ACC',kNN_Test_ACC',DT_Test_ACC',SV
 anova1(ACCArray)
 
 %% ----------------------<Confusion Matrix>-------------------------------
-Result_LDA=predict(LDA_Model,ULDA_Features_Test);
+load('Classifiers_new.mat');
+
+Result_LDA=predict(SVM_ULDA_mRMR_model,ULDA_mRMR_Test);
 
 NewLabels=[];
 PredictLabels=[];
@@ -552,6 +556,20 @@ end
 
 
 cm=confusionchart(NewLabels,PredictLabels);
-cm.Title='Sickle Cell Classification Using ULDA';
+cm.Title='Sickle Cell Classification Using an SVM with ULDA and mRMR';
 cm.RowSummary = 'row-normalized';
 cm.ColumnSummary = 'column-normalized';
+
+% Finding and plotting misclassified images
+
+%Images Classified as sickle but actually normal
+Type1Error=(strcmp(NewLabels,'Normal')==true)&(strcmp(PredictLabels,'Sickle')==true);
+Type2Error=(strcmp(NewLabels,'Sickle')==true)&(strcmp(PredictLabels,'Normal')==true);
+
+figure;
+montage(OriginalImages_Test(Type1Error));
+title('Type 1 Errors');
+
+figure;
+montage(OriginalImages_Test(Type2Error));
+title('Type 2 Errors');
