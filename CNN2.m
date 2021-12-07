@@ -86,6 +86,11 @@ net=trainNetwork(augmentedTrainingSet,layers,options);
 save('NeuralNetResults.mat','net','augmentedTestSet', 'cellTrain');
 
 
+%% Testing Network
+Ypred=classify(net,augmentedTestSet);
+Yvalidation=CellValidate.Labels;
+
+accuracy_CNN=sum(Ypred==Yvalidation)/numel(Yvalidation);
 
 
 
