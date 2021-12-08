@@ -528,17 +528,31 @@ title('Percentage of mRMR Score For Each Feature');
 %each classifier and then perform an ANOVA
 
 %-------<Partition Test Data into 10 Parts and Evaluate Accuracy>----------
-NB_Test_ACC=TestAcc(ULDA_Features_Test,TestLabels,NB_Model);
-LDA_Test_ACC=TestAcc(ULDA_Features_Test,TestLabels,LDA_Model);
-QDA_Test_ACC=TestAcc(ULDA_Features_Test,TestLabels,QDA_Model);
-kNN_Test_ACC=TestAcc(ULDA_Features_Test,TestLabels,kNN_Model);
-DT_Test_ACC=TestAcc(ULDA_Features_Test,TestLabels,DT_Model);
-SVM_Test_ACC=TestAcc(ULDA_Features_Test,TestLabels,SVM_Model);
+numParts = 10;
+NB_Test_ACC=TestAcc(ULDA_mRMR_Test,TestLabels,NB_ULDA_mRMR_Model, numParts);
+LDA_Test_ACC=TestAcc(ULDA_mRMR_Test,TestLabels,LDA_ULDA_mRMR_Model, numParts);
+QDA_Test_ACC=TestAcc(ULDA_mRMR_Test,TestLabels,QDA_ULDA_mRMR_Model, numParts);
+kNN_Test_ACC=TestAcc(ULDA_mRMR_Test,TestLabels,kNN_ULDA_mRMR_Model, numParts);
+DT_Test_ACC=TestAcc(ULDA_mRMR_Test,TestLabels,DT_ULDA_mRMR_Model, numParts);
+SVM_Test_ACC=TestAcc(ULDA_mRMR_Test,TestLabels,SVM_ULDA_mRMR_Model, numParts);
 
-ACCArray=[NB_Test_ACC',LDA_Test_ACC',QDA_Test_ACC',kNN_Test_ACC',DT_Test_ACC',SVM_Test_ACC'];
+CNNTest = cell(augmentedTestSet.NumObservations, 1);
+for i = 1:augmentedTestSet.NumObservations
+    CNNTest{i} = rgb2gray(imread(augmentedTestSet.Files{i}));
+end
+
+CNNTest(151) = [];
+
+CNN_Test_ACC = CNNTestAcc(CNNTest, CellTrain.Labels, net, numParts);
+
+ACCArray=[NB_Test_ACC',LDA_Test_ACC',QDA_Test_ACC',kNN_Test_ACC',DT_Test_ACC',SVM_Test_ACC' CNN_Test_ACC'];
 
 %Performing an ANOVA
-anova1(ACCArray)
+[p, tbl, stats] = anova1(ACCArray);
+figure
+boxplot(ACCArray, 'Labels', {'NB', 'LDA', 'QDA', 'kNN', 'DT', 'SVM', 'CNN'})
+title('Boxplot of Classifiers and CNN on Groups of Test Data')
+ylabel('Accuracy')
 
 %% ----------------------<Confusion Matrix>-------------------------------
 load('Classifiers_new.mat');    %Loads the classifiers previously trained and saved
