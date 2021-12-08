@@ -1,4 +1,17 @@
 function [BW_Refined]=ComplementAndExtract(BW_Image)
+%{
+Title: ComplementAndExtract
+Author: Alexandre Banks, Christian  Morrel
+Date:November 14th, 2021
+Affiliation: University of New Brunswick, ECE 4553
+Desription: Complements grayscale images and extracts the blob with the
+largest area (does not fill any holes)
+
+Input:
+BW_Image (array of binary images)
+BW_Refined (array of extracted and complemented cell images)
+
+%}
 n=length(BW_Image);
 BW_Refined=cell(1,n);
 for(i=[1:n])

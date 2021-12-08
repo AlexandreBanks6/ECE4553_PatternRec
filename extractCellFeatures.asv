@@ -92,7 +92,7 @@ end
 %the image
 EquivDiamVec=zeros(1,nImages);
 for(i=[1:nImages])
-        Val=regionprops(BW_Dat_Ref{i},'EquivDiameter'); %regionprops() used to calculate equivalent diameter
+        Val=regionprops(BW_Dat_Ref{i},'EquivDiameter'); %regionprops() used to calculate equivalent diame
         EquivDiamVec(i)=Val.EquivDiameter;
 end
 
@@ -101,7 +101,7 @@ end
 %Computes solidity as the cell area/convex area
 SolidityVec=zeros(1,nImages);
 for(i=[1:nImages])
-        Val=regionprops(BW_Dat_Ref{i},'Solidity');  %Using regionprops() to calculate the solidity
+        Val=regionprops(BW_Dat_Ref{i},'Solidity');
         SolidityVec(i)=Val.Solidity;
 end
 
@@ -109,7 +109,7 @@ end
 %(Standard Deviation of Grayscale values)
 TextureVec=zeros(1,nImages);
 for(i=[1:nImages])
-        X=images{i}; %Grayscale Image Matrix
+        X=images{i}; %Grascale Image Matrix
         TextureVec(i)=std(im2double(X),0,'all');
 end
 
@@ -128,7 +128,6 @@ end
 %Array of features
 featureSet=[PerimVec',AreaVec',CircularityVec',MinDiamVec',MaxDiamVec',ElipVec',ConvexHullVec',...
     EccentricityVec',EquivDiamVec',SolidityVec',TextureVec',SymmetryVec',SymmetryVec2',SymmetryVec3'];
-%Array of feature names
 featureNames={'Perim','Area','Circularity','MinDiam','MaxDiam','Elipticity','ConvexArea',...
     'Eccentricity','EquivalentDiam','Solidity','Texture','Symmetry','SymmetryUpDown','SymmetryRotate'};
 end
