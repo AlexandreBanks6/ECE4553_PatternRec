@@ -82,8 +82,6 @@ end
 
 %% Feature ranking
 
-% rankedFeats = featureSet(:, featureIdx);  % features ranked based off of mRMR algorithm
-
 rankedFeats = cell(size(featureSet));   % features ranked based off of mRMR algorithm
 mRMRFeats = cell(size(featureSet)); % Features after feature selection
 
@@ -97,9 +95,6 @@ end
 
 ULDAmRMRFeatures = cell(numImages, 1); % Array to hold ULDA feature space
 
-% for i = 1:numImages
-%     ULDAFeatures{i} = featureSet{i} * ULDA_W;
-% end
 
 for i = 1:numImages
     ULDAmRMRFeatures{i} = mRMRFeats{i} * ULDA_Weight;
@@ -108,8 +103,6 @@ end
 
 %% Use classifier to determine if blood sample has sickle cell anemia
 
-% threshold = 0.05;   % Threshold to determine if image should be flagged for sickle cell
-% thresholds = [0.05 0.1 0.15 0.2 0.25 0.3 0.35 0.4 0.5 0.6 0.7];
 thresholds = [0.05 0.1 0.15 0.2 0.25 0.3 0.35];
 ROCX = cell(size(thresholds));
 ROCY = cell(size(thresholds));
@@ -256,12 +249,5 @@ C = confusionmat(labels, CNNImageClassifications);
 confusionchart(C)
 title('Confusion Matrix for CNN with Threshold of 0.35')
 
-% Display classifications as histogram
-% figure()
-% barLabels = categorical({'LDA', 'DT', 'QDA', 'NB', 'SVM', 'kNN'});  % Labels for Bar Graph
-% bar(barLabels, [ldaAcc, dtAcc, qdaAcc, nbAcc, svmAcc, knnAcc])
-% xlabel('Classifier')
-% ylabel('Accuracy of classifier')
-% title('Accuracy of Each Classifier on Full-field Images')
 
 

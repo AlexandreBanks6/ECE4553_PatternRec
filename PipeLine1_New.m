@@ -524,7 +524,7 @@ title('Percentage of mRMR Score For Each Feature');
 %% -----------------------<ANOVA On Test Data>----------------------------
 
 %The best performance is only with ULDA, so we perform ULDA on the test
-%data and then split this data into 20 partitions to check the accuracy of
+%data and then split this data into 10 partitions to check the accuracy of
 %each classifier and then perform an ANOVA
 
 %-------<Partition Test Data into 10 Parts and Evaluate Accuracy>----------
