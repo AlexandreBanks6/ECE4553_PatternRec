@@ -89,14 +89,19 @@ end
 
 %% Use classifier to determine if blood sample has sickle cell anemia
 
+%
 thresholds = [0.05 0.1 0.15 0.2 0.25 0.3 0.35];
 ROCX = cell(size(thresholds));
 ROCY = cell(size(thresholds));
 
-labels = ones(numImages, 1);
-normalInDB3 = [11, 12, 14, 15, 16, 17];
-labels(1:DB3Images) = 2;    % sickle
-labels(normalInDB3) = 1;
+if strcmp(DBName, 'erythrocytesIDB2')
+    labels = 2 * ones(numImages, 1);    % every image is sickle
+elseif strcmp(DBName, 'erythrocytesIDB3')
+    labels = ones(numImages, 1);
+    normalInDB3 = [11, 12, 14, 15, 16, 17]; % images that were observed to be normal in DB3
+    labels(1:DB3Images) = 2;    % sickle
+    labels(normalInDB3) = 1;
+end
 
 for threshLoopCounter = 1:length(thresholds)
     
@@ -167,7 +172,7 @@ for threshLoopCounter = 1:length(thresholds)
         SVMImageScores(i, :) = mean(SVMScores);
     end
     
-    % ROC data
+    % ROC data for SVM
     classifiedIdx = find(SVMImageClassifications == 1 | SVMImageClassifications == 2);  % remove rejections
     ROCScores = SVMImageScores(classifiedIdx, :);
     [ROCX{threshLoopCounter}, ROCY{threshLoopCounter}] = perfcurve(labels(classifiedIdx), ROCScores(:, 2), 2);
