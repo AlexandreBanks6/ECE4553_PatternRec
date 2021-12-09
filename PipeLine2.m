@@ -20,6 +20,7 @@ DB3Images = 30;
 DBName = 'erythrocytesIDB2';    % choose which database to read in
 
 if strcmp(DBName, 'erythrocytesIDB2')
+    numImages = DB2Images;
     grayImages = loadFullFieldData(DBName, DB2Images);
 elseif strcmp(DBName, 'erythrocytesIDB3')
     grayImages = loadFullFieldData(DBName, DB3Images);
@@ -206,7 +207,19 @@ knnAcc = fullFieldAccuracy(kNNImageClassifications(kNNImageClassifications == 1 
 cnnAcc = fullFieldAccuracy(CNNImageClassifications(CNNImageClassifications == 1 | CNNImageClassifications == 2), ...
     labels(CNNImageClassifications == 1 | CNNImageClassifications == 2));
 
-% ROC for threshold (MIGHT WANT TO CHANGE SO YOU COLLECT SCORES FROM PREDICT FUNCTION, GET AVERAGE FOR THAT IMAGE)
+classifierFullFieldAccuracies = [nbAcc ldaAcc dtAcc qdaAcc svmAcc knnAcc cnnAcc]';
+
+% Bar graph of classifier accuracies for full-field images
+classifierNames = {'NB', 'LDA', 'DT', 'QDA', 'SVM', 'kNN', 'CNN'};
+barLabels=categorical(classifierNames);
+barLabels=reordercats(barLabels, classifierNames);  % reorder categorical array
+
+figure;
+bar(barLabels, classifierFullFieldAccuracies);   %Plotting bar chat of features with associated percentages
+title('Comparison of Classification Methods Applied to Full-field Images')
+ylabel('Classification Accuracy')
+
+% ROC for threshold
 figure
 
 for i = 1:length(thresholds)

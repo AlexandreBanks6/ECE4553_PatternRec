@@ -14,27 +14,37 @@ load NeuralNetResults.mat
 
 
 % Database 3
-
+DB2Images = 50;
 DB3Images = 30;
-grayImages = loadFullFieldData('erythrocytesIDB3', DB3Images);
 
-imageFiles = dir('TestDataset\Images\*.jpg');
-nFiles = length(imageFiles);
-normalImages = 300;
-fullImages = cell(normalImages, 1);    % Preallocate array
-for i = 1:nFiles
-    name = imageFiles(i).name;
-    image = imread(['TestDataset\Images\' name]);
-    fullImages{i} = image;
+DBName = 'erythrocytesIDB3';    % choose which database to read in
+
+if strcmp(DBName, 'erythrocytesIDB2')
+    grayImages = loadFullFieldData(DBName, DB2Images);
+elseif strcmp(DBName, 'erythrocytesIDB3')
+    grayImages = loadFullFieldData(DBName, DB3Images);
+    
+    % Get images from BCCD dataset
+    imageFiles = dir('TestDataset\Images\*.jpg');
+    nFiles = length(imageFiles);
+    normalImages = 300; % number of images in BCCD dataset
+    fullImages = cell(normalImages, 1);    % Preallocate array
+    for i = 1:nFiles
+        name = imageFiles(i).name;
+        image = imread(['TestDataset\Images\' name]);
+        fullImages{i} = image;
+    end
+    
+    newGray = ConvRGB_to_GRAY(fullImages');
+    
+    % Add BCCD images to sickle images for full test dataset
+    for i = 1:normalImages
+        grayImages{i + DB3Images} = newGray{i};
+    end
+    
+    numImages = normalImages + DB3Images;   % total number of images in dataset
 end
 
-newGray = ConvRGB_to_GRAY(fullImages');
-
-for i = 1:normalImages
-    grayImages{i + DB3Images} = newGray{i};
-end
-
-numImages = normalImages + DB3Images;
 
 %% Segment full field images into individual cells
 if isfile('Segmented.mat')
@@ -196,7 +206,17 @@ knnAcc = fullFieldAccuracy(kNNImageClassifications(kNNImageClassifications == 1 
 cnnAcc = fullFieldAccuracy(CNNImageClassifications(CNNImageClassifications == 1 | CNNImageClassifications == 2), ...
     labels(CNNImageClassifications == 1 | CNNImageClassifications == 2));
 
-% ROC for threshold (MIGHT WANT TO CHANGE SO YOU COLLECT SCORES FROM PREDICT FUNCTION, GET AVERAGE FOR THAT IMAGE)
+% Bar graph of classifier accuracies for full-fie
+figure;
+%The names of the features
+classifierNames = {'NB', 'LDA', 'DT', 'QDA', 'SVM', 'kNN', 'CNN'};
+barLabels=categorical(classifierNames);
+barLabels=reordercats(barLabels, classifierNames);
+
+bar(barLabels,mRMR_Features_Percentage);   %Plotting bar chat of features with associated percentages
+
+
+% ROC for threshold
 figure
 
 for i = 1:length(thresholds)

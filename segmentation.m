@@ -35,9 +35,7 @@ end
 % Convert RGB images to grayscale
 grayImages = ConvRGB_to_GRAY(fullImages)';
 
-
-%% Split up full field images into datasets
-
+% Split up full field images into datasets
 segmented = segmentFullFieldImages(grayImages);
 
 

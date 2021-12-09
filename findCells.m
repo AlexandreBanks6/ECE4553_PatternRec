@@ -32,9 +32,6 @@ for i = 1:numCells
     cells{i} = falseArr;
 end
 
-% for j = 1:length(cells)
-% imshowpair(cells{j}, image, 'montage')
-% end
 
 
 end
