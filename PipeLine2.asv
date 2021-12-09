@@ -14,37 +14,27 @@ load NeuralNetResults.mat
 
 
 % Database 3
-DB2Images = 50;
+
 DB3Images = 30;
+grayImages = loadFullFieldData('erythrocytesIDB3', DB3Images);
 
-DBName = 'erythrocytesIDB2';    % choose which database to read in
-
-if strcmp(DBName, 'erythrocytesIDB2')
-    grayImages = loadFullFieldData(DBName, DB2Images);
-elseif strcmp(DBName, 'erythrocytesIDB3')
-    grayImages = loadFullFieldData(DBName, DB3Images);
-    
-    % Get images from BCCD dataset
-    imageFiles = dir('TestDataset\Images\*.jpg');
-    nFiles = length(imageFiles);
-    normalImages = 300; % number of images in BCCD dataset
-    fullImages = cell(normalImages, 1);    % Preallocate array
-    for i = 1:nFiles
-        name = imageFiles(i).name;
-        image = imread(['TestDataset\Images\' name]);
-        fullImages{i} = image;
-    end
-    
-    newGray = ConvRGB_to_GRAY(fullImages');
-    
-    % Add BCCD images to sickle images for full test dataset
-    for i = 1:normalImages
-        grayImages{i + DB3Images} = newGray{i};
-    end
-    
-    numImages = normalImages + DB3Images;   % total number of images in dataset
+imageFiles = dir('TestDataset\Images\*.jpg');
+nFiles = length(imageFiles);
+normalImages = 300;
+fullImages = cell(normalImages, 1);    % Preallocate array
+for i = 1:nFiles
+    name = imageFiles(i).name;
+    image = imread(['TestDataset\Images\' name]);
+    fullImages{i} = image;
 end
 
+newGray = ConvRGB_to_GRAY(fullImages');
+
+for i = 1:normalImages
+    grayImages{i + DB3Images} = newGray{i};
+end
+
+numImages = normalImages + DB3Images;
 
 %% Segment full field images into individual cells
 if isfile('Segmented.mat')
